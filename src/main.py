@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from src.bot.middleware import ExternalURL
+from src.database import init_models
 from src.routers.auth.router import router as auth_router
 from src.bot import bot, dispatcher
 from pyngrok import ngrok
@@ -20,6 +21,8 @@ WEBHOOK_URL = f"{tunnel.public_url}{WEBHOOK_PATH}"
 
 @app.on_event("startup")
 async def on_startup():
+    await init_models()
+
     dispatcher.message.middleware(ExternalURL(tunnel.public_url))
     webhook_info = await bot.get_webhook_info()
 

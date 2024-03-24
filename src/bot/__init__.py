@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher
 
-from src.bot.routers import root_router
+from src.bot.handlers import root_router
 from src.config import cfg
 
 bot = Bot(
