@@ -11,3 +11,4 @@ class User(Base):
     password = Column(String, nullable=False)
 
     email = Column(String, nullable=False)
+    telegram_id = Column(Integer, nullable=True, index=True)

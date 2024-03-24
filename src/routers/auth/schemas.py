@@ -21,3 +21,8 @@ class TokenSchema(BaseModel):
 class TokenPayload(BaseModel):
     exp: float
     payload: Dict[str, int]
+
+
+class TelegramAuth(BaseModel):
+    auth_id: str
+    telegram_auth: str

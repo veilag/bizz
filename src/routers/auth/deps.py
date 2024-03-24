@@ -61,3 +61,33 @@ async def current_user(
         )
 
     return user
+
+
+async def check_user(
+        token: str,
+        session: AsyncSession) -> User | None:
+
+    try:
+        payload = jwt.decode(
+            token=token,
+            key=cfg.jwt_secret_key,
+            algorithms=[cfg.hashing_algorithm]
+        )
+
+        token_data = TokenPayload(**payload)
+
+        if datetime.fromtimestamp(token_data.exp) < datetime.now():
+            return None
+
+    except (JWTError, ValidationError):
+        return None
+
+    user: User = await get_user_by_id(
+        session=session,
+        id=token_data.payload["user_id"]
+    )
+
+    if user is None:
+        return None
+
+    return user
