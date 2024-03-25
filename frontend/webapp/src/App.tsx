@@ -1,85 +1,37 @@
-import {
-  useExpand,
-  useHapticFeedback,
-  useInitData,
-  useScanQrPopup,
-  useShowPopup, useWebApp
-} from "@vkruglikov/react-telegram-web-app";
-import {useEffect} from "react";
-import axios from "axios";
+import {useExpand, useInitData} from "@vkruglikov/react-telegram-web-app";
+import {useEffect, useState} from "react";
+import {checkAuthentication} from "./actions/auth.ts";
+import LinkView from "./views/LinkView.tsx";
+import MainView from "./views/MainView.tsx";
 
 const App = () => {
+  const [isLinked, setLinked] = useState<boolean>(false)
+  const [isLoading, setLoading] = useState<boolean>(true)
+  const [, safeData] = useInitData()
   const [, expand] = useExpand()
-  const [showQrPopup, closeQrPopup] = useScanQrPopup()
-  const [unsafeData, safeData] = useInitData()
-  const [impactOccurred, notificationOccurred,] = useHapticFeedback();
-  const webApp = useWebApp()
-  const showPopup = useShowPopup()
 
-  const handleAuth = async (authID: string, safeDataString: string | undefined) => {
-    if (safeDataString === undefined) return
+  const handleAuth = async () => {
+    const res = await checkAuthentication(safeData)
 
-    axios.post("../auth/telegram", {
-      auth_id: authID,
-      telegram_auth: safeDataString,
-    })
-      .then(() => {
-        notificationOccurred("success")
-        closeQrPopup()
-        webApp.close()
-
-      })
-      .catch(() => {
-        impactOccurred("heavy")
-        closeQrPopup()
-
-        showPopup({
-          message: "Во время авторизации произошла ошибка",
-          buttons: [
-            {
-              id: "repeat",
-              text: "Повторить"
-            },
-            {
-              id: "close",
-              text: "Выйти"
-            }
-          ]
-        }).then((buttonId) => {
-          if (buttonId === "repeat") {
-            showQrPopup({
-              text: "Отсканируйте QR-код на сайте"
-            }, (text) => {
-              handleAuth(text, safeDataString)
-            })
-          } else {
-            webApp.close()
-          }
-        })
-      })
+    setLoading(false)
+    setLinked(!(res === undefined))
   }
 
   useEffect(() => {
+    handleAuth()
     expand()
   }, []);
 
-  if (unsafeData === undefined) {
-    return (
-      <div>
-        <p>Please, open webapp inside of Telegram App</p>
-      </div>
-    )
-  }
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center p-2 h-screen">
+      <h1>Loading...</h1>
+    </div>
+  )
 
   return (
-    <div>
-      WebApp
-
-      <button onClick={() => showQrPopup({
-        text: "Отсканируйте QR-код на сайте"
-      }, (text) => {
-        handleAuth(text, safeData)
-      })}>Auth</button>
+    <div className="flex flex-col items-center justify-center p-2 h-screen">
+      {!isLinked && <LinkView onSuccessLink={() => setLinked(true)}/>}
+      {isLinked && <MainView/>}
     </div>
   )
 }

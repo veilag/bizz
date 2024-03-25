@@ -14,8 +14,8 @@ class UserAuth(BaseModel):
 
 
 class TokenSchema(BaseModel):
-    access_token: str
-    refresh_token: str
+    accessToken: str
+    refreshToken: str
 
 
 class TokenPayload(BaseModel):
@@ -23,6 +23,10 @@ class TokenPayload(BaseModel):
     payload: Dict[str, int]
 
 
+class TelegramUnsafeAuth(BaseModel):
+    telegramAuth: str
+
+
 class TelegramAuth(BaseModel):
-    auth_id: str
-    telegram_auth: str
+    connectionId: str
+    telegramAuth: str

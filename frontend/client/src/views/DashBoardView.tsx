@@ -1,24 +1,54 @@
 import useWebSocket from "react-use-websocket";
 import {useEffect, useState} from "react";
-import useLocalStorage from "react-use-localstorage";
 import {QRCodeCanvas} from "qrcode.react";
+import {WS_URL} from "../config.ts";
+import {ConnectionMessage} from "../types/socket.ts";
 
 const DashBoardView = () => {
-  const [authId, setAuthId] = useState<string>("")
+  const [connectionID, setConnectionID] = useState<string>("")
+  const {lastJsonMessage: message, sendJsonMessage} = useWebSocket<ConnectionMessage>(
+    WS_URL,
+    {
+      share: true
+    }
+  )
 
-  const [accessToken, ] = useLocalStorage("access_token")
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket(`ws://localhost:8000/auth/ws/${accessToken}`)
+  const handleTelegramAuth = () => {
+    const accessToken = localStorage.getItem("accessToken")
+
+    sendJsonMessage({
+      event: "LINK_TELEGRAM_ACCOUNT",
+      payload: {
+        data: accessToken
+      }
+    })
+  }
 
   useEffect(() => {
-    if (lastJsonMessage === null || lastJsonMessage === undefined) return
-    setAuthId(lastJsonMessage.auth_id)
+    if (message === null || message === undefined) return
 
-  }, [lastJsonMessage]);
+    switch (message.event) {
+      case "TELEGRAM_QR_CODE_ACCESS":
+        setConnectionID(message.payload.data as string)
+        break
+
+      case "SUCCESSFUL_TELEGRAM_LINK":
+        // ...
+        console.log("Telegram account linked to user account")
+        break
+    }
+
+  }, [message]);
 
   return (
     <div>
-      DashBoardView
-      <QRCodeCanvas value={authId} />
+      <h1>DashBoardView</h1>
+
+      <button onClick={() => handleTelegramAuth()}>
+        Link telegram
+      </button>
+
+      <QRCodeCanvas value={connectionID}/>
     </div>
   )
 }

@@ -1,18 +1,21 @@
+import uuid
 from asyncio import create_task
 from aiogram.types import Update
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.middleware import ExternalURL
 from src.database import init_models
+from src.database.deps import get_session
 from src.service.queue import QueueManager
 from src.routers.auth.router import router as auth_router
 from src.bot import bot, dispatcher
 from pyngrok import ngrok
 from src.config import cfg
-from src.service.socket import WebSocketManager
+from src.service.socket import WebSocketManager, ConnectedUser, ConnectionMessage
 
 app = FastAPI(
     title="BizzAI App",
@@ -69,17 +72,24 @@ async def process_bot_update(update: dict):
     await dispatcher.feed_update(update=update, bot=bot)
 
 
-@app.websocket("/ws")
+@app.websocket("/")
 async def handle_websocket(websocket: WebSocket):
-    await app.socket_manager.connect(websocket)
+    connection_id: str = str(uuid.uuid4())
+
+    await app.socket_manager.connect(
+        connection_id=connection_id,
+        websocket=websocket
+    )
 
     try:
         while True:
-            data = await websocket.receive_json()
-            print(data)
+            event = await websocket.receive_json()
+            await app.socket_manager.process_event(connection_id, ConnectionMessage(**event))
 
     except WebSocketDisconnect:
-        app.socket_manager.disconnect(websocket)
+        await app.socket_manager.disconnect(
+            connection_id=connection_id
+        )
 
 
 @app.get("/", description="Send root client")

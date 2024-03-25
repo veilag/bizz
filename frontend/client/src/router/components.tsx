@@ -1,4 +1,3 @@
-import {useAuthentication} from "../helpers.ts";
 import {ReactNode} from "react";
 import {Navigate} from "react-router-dom";
 
@@ -7,8 +6,8 @@ interface LoginSafeRouteProps {
 }
 
 const LoginSafeRoute = ({children}: LoginSafeRouteProps) => {
-  const isAuthorized = useAuthentication()
-  return isAuthorized ? children : <Navigate to="/auth" />
+  const accessToken = localStorage.getItem("accessToken")
+  return accessToken !== null ? children : <Navigate to="/auth" />
 }
 
 export {

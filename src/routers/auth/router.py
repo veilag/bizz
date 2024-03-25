@@ -1,15 +1,14 @@
-import uuid
-
 from aiogram.utils.web_app import safe_parse_webapp_init_data
-from fastapi import APIRouter, Depends, HTTPException, status, WebSocket
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.deps import get_session
 from src.models import User
-from src.routers.auth.deps import current_user, check_user
-from src.routers.auth.schemas import TokenSchema, UserOut, UserAuth, TelegramAuth
-from src.routers.auth.service import get_user, add_user, update_user_telegram, AuthSocketManager
+from src.routers.auth.deps import current_user
+from src.routers.auth.schemas import TokenSchema, UserOut, UserAuth, TelegramAuth, TelegramUnsafeAuth
+from src.routers.auth.service import get_user, add_user, update_user_telegram, get_user_by_telegram_id
+from src.service.socket import WebSocketManager
 from src.utils import verify_password, create_access_token, create_refresh_token
 from src.bot import bot
 
@@ -17,8 +16,6 @@ router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
-
-socket_manager = AuthSocketManager()
 
 
 @router.post("/signup", response_model=UserOut, summary="Create new user")
@@ -65,25 +62,35 @@ async def handle_user_login(
         )
 
     return {
-        "access_token": create_access_token({
+        "accessToken": create_access_token({
             "user_id": user.id
         }),
 
-        "refresh_token": create_refresh_token({
+        "refreshToken": create_refresh_token({
             "user_id": user.id
         })
     }
 
 
-@router.post("/telegram", include_in_schema=False, summary="Integrate user Telegram account")
-async def handle_telegram_integration(
+@router.post("/login/telegram", summary="Login user via linked Telegram account")
+async def handle_user_login_via_telegram(
+        request: Request,
         auth_data: TelegramAuth,
         session: AsyncSession = Depends(get_session)):
+
+    socket_manager: WebSocketManager = request.app.socket_manager
+    connection_is_valid = socket_manager.validate_connection(auth_data.connectionId)
+
+    if not connection_is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Connection session is invalid"
+        )
 
     try:
         telegram_data = safe_parse_webapp_init_data(
             token=bot.token,
-            init_data=auth_data.telegram_auth
+            init_data=auth_data.telegramAuth
         )
 
     except ValueError:
@@ -92,45 +99,113 @@ async def handle_telegram_integration(
             detail="Could not parse telegram credentials"
         )
 
-    connection = socket_manager.get_connection(auth_data.auth_id)
+    user = await get_user_by_telegram_id(
+        session=session,
+        telegram_id=telegram_data.user.id
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Telegram account is not linked to service"
+        )
+
+    await socket_manager.send(
+        connection_id=auth_data.connectionId,
+        event="ACCESS_TOKEN_ACCEPT",
+        payload={
+            "data": {
+                "accessToken": create_access_token({
+                    "user_id": user.id
+                }),
+
+                "refreshToken": create_refresh_token({
+                    "user_id": user.id
+                })
+            }
+        }
+    )
+
+    return {
+        "message": "Client session authorized"
+    }
+
+
+@router.post("/telegram", include_in_schema=False, summary="Integrate user Telegram account")
+async def handle_telegram_integration(
+        request: Request,
+        auth_data: TelegramAuth,
+        session: AsyncSession = Depends(get_session)):
+
+    try:
+        telegram_data = safe_parse_webapp_init_data(
+            token=bot.token,
+            init_data=auth_data.telegramAuth
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not parse telegram credentials"
+        )
+
+    socket_manager: WebSocketManager = request.app.socket_manager
+    connection_user: User = socket_manager.get_connection_user(auth_data.connectionId)
+
+    if connection_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid connection session"
+        )
 
     await update_user_telegram(
         session=session,
-        user_id=connection["user_id"],
+        user_id=socket_manager.get_connection_user(auth_data.connectionId).id,
         telegram_id=telegram_data.user.id
     )
 
     await session.commit()
-    await socket_manager.commit(auth_data.auth_id)
+    await socket_manager.send(
+        connection_id=auth_data.connectionId,
+        event="SUCCESSFUL_TELEGRAM_LINK",
+    )
+
     return {
-        "message": "Telegram account authorized"
+        "message": "Telegram account linked"
     }
+
+
+@router.post("/telegram/me", response_model=UserOut)
+async def handle_telegram_credential_send(
+        auth_data: TelegramUnsafeAuth,
+        session: AsyncSession = Depends(get_session)):
+
+    try:
+        telegram_data = safe_parse_webapp_init_data(
+            token=bot.token,
+            init_data=auth_data.telegramAuth
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not parse telegram credentials"
+        )
+
+    user = await get_user_by_telegram_id(
+        session=session,
+        telegram_id=telegram_data.user.id
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Telegram account is not linked to service"
+        )
+
+    return user
 
 
 @router.post("/me", response_model=UserOut, summary="Get user credentials")
 async def handle_user_credential_send(user: User = Depends(current_user)):
     return user
-
-
-@router.websocket("/ws/{token}")
-async def handle_telegram_socket(
-        websocket: WebSocket,
-        token: str,
-        session: AsyncSession = Depends(get_session)):
-
-    await websocket.accept()
-
-    user = await check_user(
-        token=token,
-        session=session
-    )
-
-    if not user:
-        await websocket.send_text("Unauthorized connection")
-        await websocket.close()
-
-    auth_id = str(uuid.uuid4())
-    await socket_manager.connect(auth_id, user.id, websocket)
-
-    while True:
-        await websocket.receive_json()
