@@ -1,8 +1,8 @@
 import useWebSocket from "react-use-websocket";
 import {useEffect, useState} from "react";
-import {QRCodeCanvas} from "qrcode.react";
 import {WS_URL} from "../config.ts";
 import {ConnectionMessage} from "../types/socket.ts";
+import {QRCode} from "react-qrcode-logo";
 
 const DashBoardView = () => {
   const [connectionID, setConnectionID] = useState<string>("")
@@ -48,7 +48,7 @@ const DashBoardView = () => {
         Link telegram
       </button>
 
-      <QRCodeCanvas value={connectionID}/>
+      <QRCode value={connectionID}/>
     </div>
   )
 }

@@ -42,6 +42,7 @@ const LinkView = ({ onSuccessLink }: LinkViewProps) => {
             },
             {
               id: "close",
+              type: "destructive",
               text: "Выйти"
             }
           ]

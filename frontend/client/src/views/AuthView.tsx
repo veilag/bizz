@@ -5,9 +5,37 @@ import {TokenPayload, TokenResponse} from "../types/auth.ts";
 import useWebSocket from "react-use-websocket";
 import {ConnectionMessage, StringPayload} from "../types/socket.ts";
 import {WS_URL} from "../config.ts";
-import {QRCodeCanvas} from "qrcode.react";
+import {QRCode} from "react-qrcode-logo";
+import {Label} from "@/components/ui/label.tsx";
+import {Input} from "@/components/ui/input.tsx";
+import {Button} from "@/components/ui/button.tsx"
+import {Loader, ArrowLeftCircle} from "react-feather";
+import {animated, useTransition} from "@react-spring/web";
 
 const AuthView = () => {
+  const [isLoading, setLoading] = useState<boolean>(false)
+  const [isCodeShowed, setCodeShowed] = useState<boolean>(false)
+  const transition = useTransition(isCodeShowed, {
+    from: {
+      margin: "0px 0px",
+      width: "0px",
+      transform: "scale(0.3)",
+      opacity: 0
+    },
+    enter: {
+      margin: "0px 20px",
+      width: "320px",
+      transform: "scale(1.0)",
+      opacity: 1
+    },
+    leave: {
+      width: "0px",
+      margin: "0px 0px",
+      transform: "scale(0.3)",
+      opacity: 0
+    }
+  })
+
   const [connectionID, setConnectionID] = useState<string>("")
   const {lastJsonMessage: message, sendJsonMessage} = useWebSocket<ConnectionMessage>(
     WS_URL,
@@ -22,6 +50,7 @@ const AuthView = () => {
   const password = useRef<HTMLInputElement>(null)
 
   const handleLogin = async () => {
+    setLoading(true)
     if (username.current === null || password.current == null) return
 
     const params = new URLSearchParams();
@@ -47,10 +76,19 @@ const AuthView = () => {
   }
 
   const handleLoginViaTelegram = async () => {
-    sendJsonMessage({
-      "event": "AUTH_VIA_TELEGRAM",
-      "payload": null
-    })
+    if (isCodeShowed) {
+      setCodeShowed(false)
+      return
+    }
+
+    setCodeShowed(true)
+
+    setTimeout(() => {
+      sendJsonMessage({
+        "event": "AUTH_VIA_TELEGRAM",
+        "payload": null
+      })
+    }, 1000)
   }
 
   useEffect(() => {
@@ -71,7 +109,11 @@ const AuthView = () => {
             data: (message.payload as TokenPayload).data.accessToken
           }
         })
-        navigate("/")
+
+        setCodeShowed(false)
+        setTimeout(() => {
+          navigate("/")
+        }, 1000)
 
         break
     }
@@ -79,15 +121,41 @@ const AuthView = () => {
   }, [message]);
 
   return (
-    <div>
-      <h1>Auth</h1>
-      <input type="text" placeholder="Username" ref={username}/>
-      <input type="text" placeholder="Password" ref={password}/>
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-96 flex flex-col gap-4">
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <Label className={`${isCodeShowed && 'text-muted-foreground'}`} htmlFor="email">Никнейм</Label>
+          <Input disabled={isCodeShowed} ref={username} type="email" id="email" placeholder="@username"/>
+        </div>
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <Label className={`${isCodeShowed && 'text-muted-foreground'}`} htmlFor="password">Пароль</Label>
+          <Input disabled={isCodeShowed} ref={password} type="email" id="email" placeholder="password"/>
+        </div>
 
-      <button onClick={() => handleLogin()}>Login</button>
-      <button onClick={() => handleLoginViaTelegram()}>Auth via Telegram</button>
+        <div className="flex flex-col gap-2">
+          <Button disabled={isCodeShowed} onClick={() => handleLogin()}>{isLoading ? <Loader className='animate-spin'/> : 'Авторизоваться'}</Button>
+          <Button onClick={() => handleLoginViaTelegram()} className="bg-blue-500 text-white hover:bg-blue-600">
+            <ArrowLeftCircle className={`mr-2 transition-all ease-in delay-300 ${isCodeShowed ? 'rotate-0' : 'rotate-180'}`} size={20}/> Войти через Telegram
+          </Button>
+        </div>
+      </div>
 
-      <QRCodeCanvas value={connectionID}/>
+      {transition((style, item) =>
+          item && <animated.div style={style} className="w-80 relative">
+                  <div className="overflow-hidden w-80">
+                      <h2>Отсканируйте QR-код</h2>
+                      <p className="text-muted-foreground text-sm">Откройте @bizz_bot в Telegram для сканирования кода для сканирования кода
+                      </p>
+
+                      <div className="overflow-clip rounded-2xl inline-block mt-3">
+                        {connectionID !== "" && <QRCode size={250} eyeRadius={5} value={connectionID}/>}
+                        {connectionID === "" &&
+                            <div className="w-[270px] h-[270px] bg-white text-black flex justify-center items-center"><Loader
+                                className="animate-spin"/></div>}
+                      </div>
+                  </div>
+              </animated.div>
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import useWebSocket, {ReadyState} from "react-use-websocket";
 import {useEffect} from "react";
 import {ConnectionMessage} from "./types/socket.ts";
 import {WS_URL} from "./config.ts";
+import {ThemeProvider} from "@/components/theme.tsx";
 
 const App = () => {
   const {readyState, sendJsonMessage} = useWebSocket<ConnectionMessage>(
@@ -30,7 +31,11 @@ const App = () => {
 
   }, [readyState, sendJsonMessage]);
 
-  return <RouterProvider router={router} />
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="theme">
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  )
 }
 
 export default App
