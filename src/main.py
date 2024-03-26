@@ -1,21 +1,19 @@
 import uuid
 from asyncio import create_task
 from aiogram.types import Update
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.middleware import ExternalURL
 from src.database import init_models
-from src.database.deps import get_session
 from src.service.queue import QueueManager
 from src.routers.auth.router import router as auth_router
 from src.bot import bot, dispatcher
 from pyngrok import ngrok
 from src.config import cfg
-from src.service.socket import WebSocketManager, ConnectedUser, ConnectionMessage
+from src.service.socket import WebSocketManager, ConnectionMessage
 
 app = FastAPI(
     title="BizzAI App",
