@@ -24,7 +24,7 @@ async def get_user_by_id(session: AsyncSession, id: int) -> User:
     return result.scalars().one()
 
 
-async def get_user_by_telegram_id(session: AsyncSession, telegram_id: int) -> User | None:
+async def get_user_by_telegram_id(session: AsyncSession, telegram_id: str) -> User | None:
     result = await session.execute(
         select(User)
         .where(User.telegram_id == telegram_id)
@@ -33,7 +33,7 @@ async def get_user_by_telegram_id(session: AsyncSession, telegram_id: int) -> Us
     return result.scalars().one_or_none()
 
 
-async def update_user_telegram(session: AsyncSession, user_id: int, telegram_id: int):
+async def update_user_telegram(session: AsyncSession, user_id: int, telegram_id: str):
     await session.execute(
         update(User)
         .where(User.id == user_id)

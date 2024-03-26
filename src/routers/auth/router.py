@@ -78,6 +78,8 @@ async def handle_user_login_via_telegram(
         auth_data: TelegramAuth,
         session: AsyncSession = Depends(get_session)):
 
+    print(auth_data)
+
     socket_manager: WebSocketManager = request.app.socket_manager
     connection_is_valid = socket_manager.validate_connection(auth_data.connectionId)
 
@@ -101,7 +103,7 @@ async def handle_user_login_via_telegram(
 
     user = await get_user_by_telegram_id(
         session=session,
-        telegram_id=telegram_data.user.id
+        telegram_id=str(telegram_data.user.id)
     )
 
     if user is None:
@@ -161,7 +163,7 @@ async def handle_telegram_integration(
     await update_user_telegram(
         session=session,
         user_id=socket_manager.get_connection_user(auth_data.connectionId).id,
-        telegram_id=telegram_data.user.id
+        telegram_id=str(telegram_data.user.id)
     )
 
     await session.commit()
@@ -194,7 +196,7 @@ async def handle_telegram_credential_send(
 
     user = await get_user_by_telegram_id(
         session=session,
-        telegram_id=telegram_data.user.id
+        telegram_id=str(telegram_data.user.id)
     )
 
     if user is None:

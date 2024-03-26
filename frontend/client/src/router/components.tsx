@@ -7,7 +7,7 @@ interface LoginSafeRouteProps {
 
 const LoginSafeRoute = ({children}: LoginSafeRouteProps) => {
   const accessToken = localStorage.getItem("accessToken")
-  return accessToken !== null ? children : <Navigate to="/auth" />
+  return accessToken !== null ? children : <Navigate to="/login" />
 }
 
 export {

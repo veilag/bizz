@@ -20,11 +20,9 @@ const MainView = () => {
     })
       .then(() => {
         notificationOccurred("success")
-        closeQrPopup()
       })
       .catch(() => {
         impactOccurred("heavy")
-        closeQrPopup()
 
         showPopup({
           message: "Во время авторизации произошла ошибка",
@@ -44,12 +42,19 @@ const MainView = () => {
       })
   }
 
+  if (safeData === undefined) return (
+    <>
+    <h1>Откройте сайт через Telegram</h1>
+    </>
+  )
+
   return (
     <>
       <h1>Авторизуйтесь на сайте</h1>
       <MainButton onClick={() => showQrPopup({
         text: "Отсканируйте QR-код на сайте"
       }, (connectionID) => {
+        closeQrPopup()
         handleAuth(connectionID, safeData)
       })} text="Авторизоваться на сайте"/>
     </>

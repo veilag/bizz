@@ -32,7 +32,7 @@ const App = () => {
   }, [readyState, sendJsonMessage]);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="theme">
+    <ThemeProvider defaultTheme="system" storageKey="theme">
       <RouterProvider router={router} />
     </ThemeProvider>
   )
