@@ -61,7 +61,23 @@ const LoginView = () => {
   const {lastJsonMessage: message, sendJsonMessage} = useWebSocket<ConnectionMessage>(
     WS_URL,
     {
-      share: true
+      share: true,
+      onError: () => {
+        setConnectionID("")
+      },
+
+      onClose: () => {
+        setConnectionID("")
+      },
+
+      onOpen: () => {
+        sendJsonMessage({
+          "event": "AUTH_VIA_TELEGRAM",
+          "payload": null
+        })
+      },
+
+      shouldReconnect: () => true
     }
   )
 
@@ -130,13 +146,6 @@ const LoginView = () => {
 
     setCodeShowed(true)
     form.clearErrors()
-
-    setTimeout(() => {
-      sendJsonMessage({
-        "event": "AUTH_VIA_TELEGRAM",
-        "payload": null
-      })
-    }, 1000)
   }
 
   useEffect(() => {
@@ -170,7 +179,17 @@ const LoginView = () => {
         break
     }
 
-  }, [message]);
+  }, [message, sendJsonMessage]);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken")
+    if (accessToken !== null) navigate("/")
+
+    sendJsonMessage({
+      "event": "AUTH_VIA_TELEGRAM",
+      "payload": null
+    })
+  }, []);
 
   return (
     <div className="flex items-center justify-center w-full h-screen">

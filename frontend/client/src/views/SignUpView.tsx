@@ -5,7 +5,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Loader} from "react-feather";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 
@@ -62,6 +62,11 @@ const SignUpView = () => {
         setLoading(false)
       })
   }
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken")
+    if (accessToken !== null) navigate("/")
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen">
