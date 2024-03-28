@@ -7,14 +7,17 @@ import {Button} from "@/components/ui/button.tsx";
 import {Loader} from "react-feather";
 import {TelegramLogo} from "@/assets/icons";
 import {Dialog, DialogContent} from "@/components/ui/dialog.tsx";
+import {toast} from "sonner";
 
 interface TelegramLinkingAlertProps {
   open: boolean
-  onLink: () => void
+  onLink: (result: boolean) => void
   onClose: () => void
 }
 
-const TelegramLinkingAlert = ({open, onLink, onClose }: TelegramLinkingAlertProps) => {
+const TelegramLinkingDialog = ({open, onLink, onClose }: TelegramLinkingAlertProps) => {
+  // const {toast} = useToast()
+
   const [connectionID, setConnectionID] = useState<string>("")
   const [isLoading, setLoading] = useState<boolean>(false)
 
@@ -57,14 +60,19 @@ const TelegramLinkingAlert = ({open, onLink, onClose }: TelegramLinkingAlertProp
         break
 
       case "SUCCESSFUL_TELEGRAM_LINK":
-        onLink()
+        onLink(true)
+        toast.success("Telegram аккаунт успешно привязан", {
+          classNames: {
+            toast: "w-fit"
+          }
+        })
         break
     }
 
   }, [message]);
 
   return (
-    <Dialog open={open} onOpenChange={() => onLink()}>
+    <Dialog open={open} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-none w-auto flex content-stretch items-stretch p-6">
         <div className="flex flex-col justify-between items-start my-2 mr-4">
           <div className="flex gap-5 items-center justify-center">
@@ -93,4 +101,4 @@ const TelegramLinkingAlert = ({open, onLink, onClose }: TelegramLinkingAlertProp
   )
 }
 
-export default TelegramLinkingAlert
+export default TelegramLinkingDialog

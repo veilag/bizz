@@ -9,11 +9,13 @@ from fastapi.responses import FileResponse
 from src.bot.middleware import ExternalURL
 from src.database import init_models
 from src.service.queue import QueueManager
-from src.routers.auth.router import router as auth_router
 from src.bot import bot, dispatcher
 from pyngrok import ngrok
 from src.config import cfg
 from src.service.socket import WebSocketManager, ConnectionMessage
+
+from src.routers.auth.router import router as auth_router
+from src.routers.business.router import router as business_router
 
 app = FastAPI(
     title="BizzAI App",
@@ -36,11 +38,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.queue_manager = QueueManager()
 app.socket_manager = WebSocketManager()
+app.queue_manager = QueueManager(app.socket_manager)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth_router)
+app.include_router(business_router)
 
 tunnel = ngrok.connect(addr=cfg.base_url)
 WEBHOOK_PATH = f"/bot/{cfg.telegram_bot_token}"

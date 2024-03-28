@@ -47,6 +47,17 @@ class WebSocketManager:
                 "payload": payload
             })
 
+    async def send_to_user(self, user_id: int, event: str, payload: Dict[str, Any]):
+        for connection_id in self.active_connections:
+            connection = self.active_connections[connection_id]
+            user: User = connection.get("user")
+
+            if user.id == user_id:
+                await connection.get("connection").send_json({
+                    "event": event,
+                    "payload": payload
+                })
+
     def validate_connection(self, connection_id: str):
         return not (self.active_connections.get(connection_id, None) is None)
 

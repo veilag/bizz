@@ -1,8 +1,8 @@
 interface IconProps {
-  className: string | undefined
+  className?: string | undefined
 }
 
-const TelegramLogo = ({className}: IconProps) => {
+const TelegramLogo = ({className = undefined}: IconProps) => {
   return (
     <svg width={20} height={20} className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240.1 240.1">
       <circle className="dark:fill-white fill-neutral-900" fillRule="evenodd" clipRule="evenodd" cx="120.1" cy="120.1" r="120.1"/>

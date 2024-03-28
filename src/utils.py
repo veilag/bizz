@@ -7,6 +7,10 @@ from src.config import cfg
 password_context = CryptContext(schemes=["bcrypt"])
 
 
+def to_snake_case(string: str) -> str:
+    return ''.join(['_' + i.lower() if i.isupper() else i for i in string]).lstrip('_')
+
+
 def get_hashed_password(password: str) -> str:
     return password_context.hash(password)
 

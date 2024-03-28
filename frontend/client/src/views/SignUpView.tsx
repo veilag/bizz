@@ -8,6 +8,7 @@ import {Loader} from "react-feather";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import {toast} from "sonner";
 
 const SignUpView = () => {
   const [isLoading, setLoading] = useState<boolean>(false)
@@ -56,10 +57,29 @@ const SignUpView = () => {
     })
       .then(() => {
         setLoading(false)
+        toast.success("Вы успешно зарегистрировались", {
+          classNames: {
+            toast: "w-fit"
+          }
+        })
         navigate("/login")
       })
-      .catch(() => {
+      .catch((error) => {
         setLoading(false)
+
+        switch (error.code) {
+          case "ERR_BAD_REQUEST":
+            toast.warning("Имя пользователя занято", {
+              classNames: {
+                toast: "w-fit"
+              }
+            })
+            break
+
+          case "ERR_NETWORK":
+            toast.error("Сервер не отвечает")
+            break
+        }
       })
   }
 

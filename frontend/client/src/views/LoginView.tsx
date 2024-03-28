@@ -21,32 +21,22 @@ import {WS_URL} from "@/config.ts";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {TokenPayload, TokenResponse} from "@/types/auth.ts";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogDescription,
-  AlertDialogTitle
-} from "@/components/ui/alert-dialog.tsx";
 import {TelegramLogo} from "@/assets/icons";
+import {toast} from "sonner";
 
+const formSchema = z.object({
+  username: z.string().min(6, {
+    message: "Введите не менее 6 символов"
+  }).max(30),
+
+  password: z.string().min(8, {
+    message: "Введите не менее 8 символов"
+  })
+})
 
 const LoginView = () => {
   const [isLoading, setLoading] = useState<boolean>(false)
   const [isCodeShowed, setCodeShowed] = useState<boolean>(false)
-  const [isErrorOccured, setErrorOccured] = useState<boolean>(false)
-
-  const formSchema = z.object({
-    username: z.string().min(6, {
-      message: "Введите не менее 6 символов"
-    }).max(30),
-
-    password: z.string().min(8, {
-      message: "Введите не менее 8 символов"
-    })
-  })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -122,19 +112,27 @@ const LoginView = () => {
             }
           })
 
-          navigate("/", {
+          navigate("/list", {
             replace: true
           })
         }
       })
-      .catch(() => {
-        setErrorOccured(true)
+      .catch((error) => {
         setLoading(false)
 
-        form.reset({
-          "username": "",
-          "password": ""
-        })
+        switch (error.code) {
+          case "ERR_BAD_REQUEST":
+            toast.warning("Неправильный логин или пароль", {
+              classNames: {
+                toast: "w-fit"
+              }
+            })
+            break
+
+          case "ERR_NETWORK":
+            toast.error("Сервер не отвечает")
+            break
+        }
       })
   }
 
@@ -159,6 +157,7 @@ const LoginView = () => {
       case "ACCESS_TOKEN_ACCEPT":
         setLoading(true)
         setCodeShowed(false)
+        toast.success("Выполнен вход через Telegram")
 
         localStorage.setItem("accessToken", (message.payload as TokenPayload).data.accessToken)
         localStorage.setItem("refreshToken", (message.payload as TokenPayload).data.refreshToken)
@@ -171,9 +170,7 @@ const LoginView = () => {
         })
 
         setTimeout(() => {
-          navigate("/", {
-            replace: true
-          })
+          navigate("/list")
         }, 1000)
 
         break
@@ -193,21 +190,6 @@ const LoginView = () => {
 
   return (
     <div className="flex items-center justify-center w-full h-screen">
-      <AlertDialog open={isErrorOccured}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>При авторизации произошла ошибка</AlertDialogTitle>
-            <AlertDialogDescription>
-              Сервер не отвечает. Повторите попытку позже
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setErrorOccured(false)}>Закрыть</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <div className="w-96">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
