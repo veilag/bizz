@@ -3,14 +3,6 @@ interface TokenResponse {
   refreshToken: string
 }
 
-interface TokenPayload {
-  data: {
-    accessToken: string
-    refreshToken: string
-  }
-}
-
 export type {
-  TokenResponse,
-  TokenPayload
+  TokenResponse
 }

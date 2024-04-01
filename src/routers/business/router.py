@@ -7,6 +7,7 @@ from src.routers.auth.deps import current_user
 from src.routers.business.schemas import GenerationRequest
 from src.routers.business import service
 from src.service.queue import QueueManager
+from src.service.socket import WebSocketManager
 
 router = APIRouter(
     prefix="/business",
@@ -22,6 +23,7 @@ async def handle_business_generation(
         user: User = Depends(current_user)
 ):
     queue_manager: QueueManager = request.app.queue_manager
+    socket_manager: WebSocketManager = request.app.socket_manager
 
     new_business_query = service.add_business_query(
         session=session,
@@ -34,6 +36,22 @@ async def handle_business_generation(
 
     await session.commit()
 
+    await socket_manager.send_to_user(
+        user_id=user.id,
+        event="QUERY_CREATED",
+        payload={
+            "id": new_business_query.id,
+            "status": new_business_query.status,
+
+            "name": new_business_query.name,
+            "query": new_business_query.query,
+            "description": new_business_query.description,
+            "city": new_business_query.city,
+            "messageGroupID": new_business_query.message_group_id,
+            "createdAt": new_business_query.created_at.isoformat()
+        }
+    )
+
     await queue_manager.add_to_queue({
         "event": "GENERATION",
         "payload": {
@@ -43,16 +61,7 @@ async def handle_business_generation(
     })
 
     return {
-        "id": new_business_query.id,
-        "isQueued": new_business_query.is_queued,
-        "isGenerating": new_business_query.is_generating,
-        "isGenerated": new_business_query.is_generated,
-
-        "name": new_business_query.name,
-        "query": new_business_query.query,
-        "description": new_business_query.description,
-        "city": new_business_query.city,
-        "createdAt": new_business_query.created_at.isoformat()
+        "message": "Business query is created"
     }
 
 
@@ -67,22 +76,18 @@ async def get_user_business_list(
     )
 
     query_list = []
-    print(business_queries)
 
     for query in business_queries:
         query_list.append({
             "id": query.id,
-            "isQueued": query.is_queued,
-            "isGenerating": query.is_generating,
-            "isGenerated": query.is_generated,
+            "status": query.status,
 
             "name": query.name,
             "query": query.query,
             "description": query.description,
             "city": query.city,
-            "createdAt": query.created_at.isoformat()
+            "createdAt": query.created_at.isoformat(),
+            "messageGroupID": query.message_group_id
         })
-
-    print(query_list)
 
     return query_list

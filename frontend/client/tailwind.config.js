@@ -66,10 +66,36 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "line-loader": {
+          "0%": {
+            left: "-40%"
+          },
+          "50%": {
+            left: "20%",
+            width: "80%"
+          },
+          "100%": {
+            left: "100%",
+            width: "100%"
+          }
+        },
+        "icon-pong": {
+          "0%": {
+            transform: "scale(1)"
+          },
+          "50%": {
+            transform: "scale(1.2)"
+          },
+          "100%": {
+            transform: "scale(1)"
+          }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "line-loader": "line-loader 1s linear infinite",
+        "icon-pong": "icon-pong 0.4s cubic-bezier(0, 0.52, 0.48, 1.28);"
       },
     },
   },

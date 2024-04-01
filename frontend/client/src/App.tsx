@@ -9,28 +9,31 @@ import useConnection from "@/hooks/connection.ts";
 
 import TimeAgo from 'javascript-time-ago'
 import ru from 'javascript-time-ago/locale/ru'
+import {Provider} from "jotai";
+import atomStore from "@/atoms";
 
 TimeAgo.addDefaultLocale(ru)
-
 
 const App = () => {
   const {isConnectionLost, isError} = useConnection()
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="theme">
-      <TooltipProvider>
-        <ConnectionStatus isConnectionLost={isConnectionLost} isError={isError} />
-        <Toaster
-          position="bottom-left"
-          toastOptions={{
-            classNames: {
-              toast: "border border-muted text-black dark:text-white bg-white dark:bg-black"
-            }
-          }}
-        />
-        <RouterProvider router={router}/>
-      </TooltipProvider>
-    </ThemeProvider>
+    <Provider store={atomStore}>
+      <ThemeProvider defaultTheme="system" storageKey="theme">
+        <TooltipProvider>
+          <ConnectionStatus isConnectionLost={isConnectionLost} isError={isError} />
+          <Toaster
+            position="bottom-left"
+            toastOptions={{
+              classNames: {
+                toast: "border border-muted text-black dark:text-white bg-white dark:bg-black"
+              }
+            }}
+          />
+          <RouterProvider router={router}/>
+        </TooltipProvider>
+      </ThemeProvider>
+    </Provider>
   )
 }
 

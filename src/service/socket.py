@@ -7,9 +7,9 @@ from src.models import User
 from src.routers.auth.deps import check_user
 
 
-class ConnectedUser(TypedDict):
-    connection: WebSocket
-    user: User | None
+class Connection(TypedDict):
+    connection_id: str
+    connection_session: WebSocket
 
 
 class ConnectionMessage(BaseModel):
@@ -19,73 +19,81 @@ class ConnectionMessage(BaseModel):
 
 class WebSocketManager:
     def __init__(self):
-        self.active_connections: Dict[str, ConnectedUser] = {}
+        self.active_connections: Dict[int, list[Connection]] = {}
+        self.unauthorized_connections: Dict[str, WebSocket] = {}
 
-    def get_connection_user(self, connection_id: str):
-        connection = self.active_connections.get(connection_id, None)
+    def get_user_id_by_connection_id(self, connection_id: str) -> int | None:
+        for user_id in self.active_connections:
+            connections = self.active_connections.get(user_id)
+            for connection in connections:
+                if connection.get("connection_id") == connection_id:
+                    return user_id
 
-        if connection is None:
-            return None
-
-        user: User = connection.get("user")
-        return user
+        return None
 
     async def connect(self, connection_id: str, websocket: WebSocket):
         await websocket.accept()
+        self.unauthorized_connections[connection_id] = websocket
 
-        self.active_connections[connection_id] = {
-            "connection": websocket,
-            "user": None
-        }
+    async def send_to_user(self, user_id: int, event: str, payload: Dict[str, Any] = None):
+        user_connections = self.active_connections.get(user_id)
 
-    async def send(self, connection_id: str, event: str, payload: Dict[str, Any] = None):
-        connection: ConnectedUser = self.active_connections.get(connection_id, None)
-
-        if connection is not None:
-            await connection.get("connection").send_json({
+        for connection in user_connections:
+            connection_session = connection.get("connection_session")
+            await connection_session.send_json({
                 "event": event,
-                "payload": payload
+                "payload": {
+                    "data": payload
+                }
             })
 
-    async def send_to_user(self, user_id: int, event: str, payload: Dict[str, Any]):
-        for connection_id in self.active_connections:
-            connection = self.active_connections[connection_id]
-            user: User = connection.get("user")
+    def authorize_connection(self, user_id: int, connection_id: str):
+        unauthorized_connection = self.unauthorized_connections.get(connection_id)
+        self.unauthorized_connections.pop(connection_id)
 
-            if user.id == user_id:
-                await connection.get("connection").send_json({
+        user_active_connections = self.active_connections.get(user_id, None)
+        if not user_active_connections:
+            self.active_connections[user_id] = [{
+                "connection_id": connection_id,
+                "connection_session": unauthorized_connection
+            }]
+
+        else:
+            self.active_connections.get(user_id).append({
+                "connection_id": connection_id,
+                "connection_session": unauthorized_connection
+            })
+
+    async def send_to_user_connection(self, user_id: int, connection_id: str, event: str, payload: Dict[str, Any] = None):
+        user_connections = self.active_connections.get(user_id)
+        for user_connection in user_connections:
+            if user_connection.get("connection_id") == connection_id:
+                await user_connection.get("connection_session").send_json({
                     "event": event,
                     "payload": payload
                 })
 
     def validate_connection(self, connection_id: str):
-        return not (self.active_connections.get(connection_id, None) is None)
+        return not (self.unauthorized_connections.get(connection_id, None) is None)
 
     async def disconnect(self, connection_id: str):
-        self.active_connections.pop(connection_id)
+        unauthorized_connection = self.unauthorized_connections.get(connection_id, None)
+        if unauthorized_connection:
+            self.unauthorized_connections.pop(connection_id)
+            return
 
-    async def process_event(self, connection_id: str, message: ConnectionMessage):
-        connection: ConnectedUser = self.active_connections.get(connection_id)
-        connection_instance: WebSocket = connection.get("connection")
+        for user_id in self.active_connections:
+            user_connections = self.active_connections.get(user_id)
+            for user_connection in user_connections:
+                if user_connection.get("connection_id") == connection_id:
+                    user_connections.remove(user_connection)
+
+    async def process_unauthorized_connection_event(self, connection_id: str, message: ConnectionMessage):
+        unauthorized_connection = self.unauthorized_connections.get(connection_id, None)
 
         match message.event:
-            case "LINK_TELEGRAM_ACCOUNT":
-                if connection.get("user") is not None:
-                    await connection_instance.send_json({
-                        "event": "TELEGRAM_QR_CODE_ACCESS",
-                        "payload": {
-                            "data": connection_id
-                        }
-                    })
-
-                else:
-                    await connection_instance.send_json({
-                        "event": "INVALID_ACCOUNT_SESSION",
-                        "payload": None
-                    })
-
             case "AUTH_VIA_TELEGRAM":
-                await connection.get("connection").send_json({
+                await unauthorized_connection.send_json({
                     "event": "TELEGRAM_QR_CODE_ACCESS",
                     "payload": {
                         "data": connection_id
@@ -100,6 +108,43 @@ class WebSocketManager:
                         token=message.payload.get("data")
                     )
 
-                    connection.update({
-                        "user": user
-                    })
+                    self.authorize_connection(
+                        user_id=user.id,
+                        connection_id=connection_id
+                    )
+
+    async def process_authorized_connection_event(self, connection_id: str, message: ConnectionMessage):
+        match message.event:
+            case "LINK_TELEGRAM_ACCOUNT":
+                for user_id in self.active_connections:
+                    user_connections = self.active_connections.get(user_id)
+
+                    for user_connection in user_connections:
+                        if user_connection.get("connection_id") == connection_id:
+                            await user_connection.get("connection_session").send_json({
+                                "event": "TELEGRAM_QR_CODE_ACCESS",
+                                "payload": {
+                                    "data": connection_id
+                                }
+                            })
+
+    async def process_event(self, connection_id: str, message: ConnectionMessage):
+        unauthorized_connection = self.unauthorized_connections.get(connection_id, None)
+
+        if unauthorized_connection:
+            await self.process_unauthorized_connection_event(
+                connection_id=connection_id,
+                message=message
+            )
+            return
+
+        for user_id in self.active_connections:
+            user_connections = self.active_connections.get(user_id)
+
+            for user_connection in user_connections:
+                if user_connection.get("connection_id") == connection_id:
+                    await self.process_authorized_connection_event(
+                        connection_id=connection_id,
+                        message=message
+                    )
+                    return

@@ -22,20 +22,20 @@ const BusinessViewMenu = ({ children }: BusinessViewMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="mr-2">
         <DropdownMenuLabel>
-          Генерации
+          Пользователи
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Plus className="mr-2 h-4 w-4" />
-          <span>Сгенерировать еще</span>
+        <DropdownMenuItem className="group">
+          <Plus className="mr-2 h-4 w-4 group-hover:animate-icon-pong" />
+          <span>Пригласить</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>
           Разное
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-500">
-        <X className="mr-2 h-4 w-4" />
+        <DropdownMenuItem className="group text-red-500">
+        <X className="mr-2 h-4 w-4 group-hover:animate-icon-pong" />
           <span>Очистить диалог</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

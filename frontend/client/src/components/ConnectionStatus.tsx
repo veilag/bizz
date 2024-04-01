@@ -7,7 +7,7 @@ interface ConnectionStatusProps {
 }
 
 const ConnectionStatus = ({isConnectionLost, isError}: ConnectionStatusProps) => {
-  const errorTransition = useTransition(isConnectionLost, {
+  const connectionLostTransition = useTransition(isConnectionLost, {
     from: {
       opacity: 0,
     },
@@ -21,7 +21,7 @@ const ConnectionStatus = ({isConnectionLost, isError}: ConnectionStatusProps) =>
 
   return (
     <>
-      {errorTransition((style, active) => (
+      {connectionLostTransition((style, active) => (
         active && (
           <animated.div
             style={style}
@@ -33,7 +33,6 @@ const ConnectionStatus = ({isConnectionLost, isError}: ConnectionStatusProps) =>
           </animated.div>
         )
       ))}
-
 
       {isError && (
         <div className="flex items-center dark:bg-white dark:text-black text-white justify-center

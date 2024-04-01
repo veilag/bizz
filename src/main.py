@@ -16,6 +16,9 @@ from src.service.socket import WebSocketManager, ConnectionMessage
 
 from src.routers.auth.router import router as auth_router
 from src.routers.business.router import router as business_router
+from src.routers.message.router import router as message_router
+from src.routers.user.router import router as user_router
+from src.routers.assistant.router import router as assistant_router
 
 app = FastAPI(
     title="BizzAI App",
@@ -44,6 +47,9 @@ app.queue_manager = QueueManager(app.socket_manager)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth_router)
 app.include_router(business_router)
+app.include_router(message_router)
+app.include_router(user_router)
+app.include_router(assistant_router)
 
 tunnel = ngrok.connect(addr=cfg.base_url)
 WEBHOOK_PATH = f"/bot/{cfg.telegram_bot_token}"
@@ -107,4 +113,5 @@ async def send_webapp():
 
 @app.on_event("shutdown")
 async def on_shutdown():
+    ngrok.disconnect(tunnel.public_url)
     await bot.session.close()

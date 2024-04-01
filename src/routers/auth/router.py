@@ -78,8 +78,6 @@ async def handle_user_login_via_telegram(
         auth_data: TelegramAuth,
         session: AsyncSession = Depends(get_session)):
 
-    print(auth_data)
-
     socket_manager: WebSocketManager = request.app.socket_manager
     connection_is_valid = socket_manager.validate_connection(auth_data.connectionId)
 
@@ -112,7 +110,13 @@ async def handle_user_login_via_telegram(
             detail="Telegram account is not linked to service"
         )
 
-    await socket_manager.send(
+    socket_manager.authorize_connection(
+        user_id=user.id,
+        connection_id=auth_data.connectionId
+    )
+
+    await socket_manager.send_to_user_connection(
+        user_id=user.id,
         connection_id=auth_data.connectionId,
         event="ACCESS_TOKEN_ACCEPT",
         payload={
@@ -152,9 +156,9 @@ async def handle_telegram_integration(
         )
 
     socket_manager: WebSocketManager = request.app.socket_manager
-    connection_user: User = socket_manager.get_connection_user(auth_data.connectionId)
+    connection_user_id: int | None = socket_manager.get_user_id_by_connection_id(auth_data.connectionId)
 
-    if connection_user is None:
+    if connection_user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid connection session"
@@ -162,14 +166,15 @@ async def handle_telegram_integration(
 
     await update_user_telegram(
         session=session,
-        user_id=socket_manager.get_connection_user(auth_data.connectionId).id,
+        user_id=connection_user_id,
         telegram_id=str(telegram_data.user.id)
     )
 
     await session.commit()
-    await socket_manager.send(
+    await socket_manager.send_to_user_connection(
+        user_id=connection_user_id,
         connection_id=auth_data.connectionId,
-        event="SUCCESSFUL_TELEGRAM_LINK",
+        event="SUCCESSFUL_TELEGRAM_LINK"
     )
 
     return {
@@ -205,9 +210,4 @@ async def handle_telegram_credential_send(
             detail="Telegram account is not linked to service"
         )
 
-    return user
-
-
-@router.post("/me", response_model=UserOut, summary="Get user credentials")
-async def handle_user_credential_send(user: User = Depends(current_user)):
     return user

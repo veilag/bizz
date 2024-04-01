@@ -5,7 +5,7 @@ import NewBusinessPlanDialog from "@/components/dialogs/NewBusinessPlanDialog.ts
 const BusinessListToolbar = () => {
   return (
     <header className="h-14 text-lg flex justify-between items-center px-4">
-      <h2 className="font-bold">Мои бизнес-планы</h2>
+      <h2 className="font-semibold">Мои бизнес-планы</h2>
       <NewBusinessPlanDialog>
         <Button size="icon" variant="ghost">
           <Plus size={18} />

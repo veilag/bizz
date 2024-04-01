@@ -1,12 +1,12 @@
-import {useEffect, useState} from "react";
-import useWebSocket, {ReadyState} from "react-use-websocket";
+import {useState} from "react";
+import useWebSocket from "react-use-websocket";
 import {ConnectionMessage} from "@/types/socket.ts";
 import {WS_URL} from "@/config.ts";
 
 const useConnection = () => {
   const [isError, setError] = useState<boolean>(false)
   const [isConnectionLost, setConnectionLost] = useState<boolean>(false)
-  const {readyState, sendJsonMessage} = useWebSocket<ConnectionMessage>(
+  const {sendJsonMessage} = useWebSocket<ConnectionMessage>(
     WS_URL,
     {
       share: true,
@@ -24,6 +24,16 @@ const useConnection = () => {
 
       onOpen: () => {
         setConnectionLost(false)
+
+        const accessToken = localStorage.getItem("accessToken")
+        if (!accessToken) return
+
+        sendJsonMessage({
+          event: "SUBSCRIBE_USER",
+          payload: {
+            data: accessToken
+          }
+        })
       },
 
       onReconnectStop: () => {
@@ -32,22 +42,6 @@ const useConnection = () => {
       }
     }
   )
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken")
-
-    if (readyState === ReadyState.OPEN) {
-      if (accessToken !== null) {
-        sendJsonMessage({
-          event: "SUBSCRIBE_USER",
-          payload: {
-            data: accessToken
-          }
-        })
-      }
-    }
-
-  }, [readyState, sendJsonMessage]);
 
   return {
     isError, isConnectionLost

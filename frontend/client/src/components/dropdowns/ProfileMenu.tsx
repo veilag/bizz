@@ -1,5 +1,4 @@
 import {Dispatch, ReactNode, SetStateAction, useState} from "react";
-import {useNavigate} from "react-router-dom";
 import {ArrowUpRight, LogOut, Settings, User} from "react-feather";
 
 import {TelegramLogo} from "@/assets/icons";
@@ -21,6 +20,8 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import SettingsDialog from "@/components/dialogs/SettingsDialog.tsx";
+import {useAtomValue} from "jotai";
+import {userAtom} from "@/atoms/user.ts";
 
 interface BusinessViewMenuProps {
   children: ReactNode
@@ -28,17 +29,15 @@ interface BusinessViewMenuProps {
 }
 
 const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
+  const user = useAtomValue(userAtom)
   const [isSettingsDialogOpen, setSettingsDialogOpen] = useState<boolean>(false)
   const {theme, setTheme} = useTheme()
-  const navigate = useNavigate()
 
   const logOut = () => {
     localStorage.removeItem("accessToken")
     localStorage.removeItem("refreshToken")
 
-    navigate("/login", {
-      replace: true
-    })
+    window.location.reload()
   }
 
   const handleSettingDialogOpen = (open: boolean) => {
@@ -55,25 +54,25 @@ const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
 
         <DropdownMenuContent side="right" className="w-56 ml-3 mt-2">
           <div className="py-2 flex flex-col">
-            <span className="px-2 text-sm font-semibold">@ rgaliev</span>
-            <span className="px-2 text-muted-foreground text-sm">rgaliev2004@gmail.com</span>
+            <span className="px-2 text-sm font-semibold">@ {user?.username}</span>
+            <span className="px-2 text-muted-foreground text-sm">{user?.email}</span>
           </div>
           <DropdownMenuSeparator/>
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <User className="mr-2 w-4 h-4"/>
+            <DropdownMenuItem className="group">
+              <User className="mr-2 w-4 h-4 group-hover:animate-icon-pong"/>
               <span>Профиль</span>
             </DropdownMenuItem>
 
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Settings className="mr-2 w-4 h-4"/>
+              <DropdownMenuSubTrigger className="group">
+                <Settings className="mr-2 w-4 h-4 group-hover:animate-icon-pong"/>
                 <span>Настройки</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent className="w-72">
-                  <DropdownMenuItem onClick={() => setSettingsDialogOpen(true)}>
-                    <ArrowUpRight className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem className="group" onClick={() => setSettingsDialogOpen(true)}>
+                    <ArrowUpRight className="mr-2 h-4 w-4 group-hover:animate-icon-pong" />
                     Открыть
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -116,8 +115,8 @@ const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
           </DropdownMenuRadioGroup>
           <DropdownMenuSeparator/>
           <DropdownMenuGroup>
-            <DropdownMenuItem className="text-red-500" onClick={() => logOut()}>
-              <LogOut className="mr-2 w-4 h-4"/>
+            <DropdownMenuItem className="group text-red-500" onClick={() => logOut()}>
+              <LogOut className="mr-2 w-4 h-4 group-hover:animate-icon-pong"/>
               <span>Выйти</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
