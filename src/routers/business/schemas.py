@@ -3,6 +3,12 @@ from pydantic import BaseModel
 
 class GenerationRequest(BaseModel):
     name: str
-    query: str
     description: str
-    city: str
+
+
+class SelectionQueryRequest(BaseModel):
+    queryID: int
+
+
+class SelectionAssistantRequest(BaseModel):
+    assistantID: int

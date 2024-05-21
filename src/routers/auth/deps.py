@@ -91,3 +91,25 @@ async def check_user(
         return None
 
     return user
+
+
+async def get_user_from_refresh_token(
+        session: AsyncSession,
+        refresh_token: str
+):
+    try:
+        payload = jwt.decode(
+            token=refresh_token,
+            key=cfg.jwt_secret_key,
+            algorithms=[cfg.hashing_algorithm]
+        )
+
+        token_data = TokenPayload(**payload)
+
+        if datetime.fromtimestamp(token_data.exp) < datetime.now():
+            return None
+
+        print(token_data)
+
+    except (JWTError, ValidationError):
+        return None

@@ -4,28 +4,26 @@ import atomStore from "@/atoms";
 
 interface SendMessageRequest {
   content: string
-  messageGroupID: number
+  assistantID: number
+  queryID: number
 }
 
-const sendMessage = ({content, messageGroupID}: SendMessageRequest) => {
+const sendMessage = ({content, assistantID, queryID}: SendMessageRequest) => {
   api.post<Message>("/message", {
     content,
-    messageGroupID
+    assistantID,
+    queryID
   })
-    .then(res => {
-      atomStore.set(messageListAtom, prev => [
-        ...prev,
-        {
-          id: res.data.id,
-          userID: res.data.userID,
-          forwardedID: res.data.forwardedID,
+}
 
-          createdAt: res.data.createdAt,
-          fromTelegram: res.data.fromTelegram,
-          content: res.data.content
-        }
-      ])
-    })
+const sendMessageCallback = (queryID: number, messageID: number, assistantID: number, fetchersData: string | undefined, callbackData: string | undefined) => {
+  api.post("/message/callback", {
+    queryID,
+    messageID,
+    assistantID,
+    fetchersData,
+    callbackData
+  })
 }
 
 const fetchMessage = (messageGroupID: number | undefined) => {
@@ -35,7 +33,13 @@ const fetchMessage = (messageGroupID: number | undefined) => {
     })
 }
 
+const clearQueryMessages = (queryID: number, assistantID: number) => {
+  return api.get(`/message/clear/${queryID}/${assistantID}`)
+}
+
 export {
   fetchMessage,
-  sendMessage
+  sendMessage,
+  sendMessageCallback,
+  clearQueryMessages
 }

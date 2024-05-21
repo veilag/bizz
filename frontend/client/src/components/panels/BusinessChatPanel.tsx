@@ -6,9 +6,10 @@ import ChatView from "@/components/ChatView.tsx";
 interface BusinessChatPanel {
   isPanelCollapsed: boolean
   onPanelCollapse: () => void
+  onClose: () => void
 }
 
-const BusinessChatPanel = ({isPanelCollapsed, onPanelCollapse}: BusinessChatPanel) => {
+const BusinessChatPanel = ({isPanelCollapsed, onPanelCollapse, onClose}: BusinessChatPanel) => {
   return (
     <ResizablePanel
       className="flex flex-col"
@@ -17,6 +18,7 @@ const BusinessChatPanel = ({isPanelCollapsed, onPanelCollapse}: BusinessChatPane
       <BusinessChatToolbar
         isPanelCollapsed={isPanelCollapsed}
         onPanelCollapse={() => onPanelCollapse()}
+        onClose={() => onClose()}
       />
       <Separator />
       <ChatView />

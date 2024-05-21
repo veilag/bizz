@@ -1,11 +1,14 @@
 from typing import Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserOut(BaseModel):
     id: int
     username: str
     email: str
+    is_developer: bool = Field(serialization_alias="isDeveloper", validation_alias="is_developer")
+    selected_query_id: int | None = Field(serialization_alias="selectedQueryID", validation_alias="selected_query_id")
+    selected_assistant_id: int | None = Field(serialization_alias="selectedAssistantID", validation_alias="selected_assistant_id")
 
 
 class UserAuth(BaseModel):
@@ -16,6 +19,10 @@ class UserAuth(BaseModel):
 
 class TokenSchema(BaseModel):
     accessToken: str
+    refreshToken: str
+
+
+class RefreshSchema(BaseModel):
     refreshToken: str
 
 

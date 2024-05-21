@@ -6,6 +6,8 @@ import {
   useWebApp
 } from "@vkruglikov/react-telegram-web-app";
 import axios from "axios";
+import {Logo} from "@/assets/icons";
+import helpSrc from '/assets/help.png';
 
 interface LinkViewProps {
   onSuccessLink: () => void
@@ -61,15 +63,22 @@ const LinkView = ({ onSuccessLink }: LinkViewProps) => {
   }
 
   return (
-    <>
-      <h1 className="text-xl">Привяжите аккаунт</h1>
+    <div className="flex flex-col h-full w-full justify-between p-6">
+      <div>
+        <Logo className="w-32"/>
+
+        <h1 className="text-2xl font-bold mt-4">Добро пожаловать</h1>
+        <p className="leading-5">Для того, чтобы продолжить, привяжите аккаунт на сайте</p>
+      </div>
+
+      <img alt="help" src={helpSrc}/>
 
       <MainButton text="Привязать аккаунт" onClick={() => showQrPopup({
         text: "Отсканируйте QR-код на сайте"
       }, (connectionID) => {
         handleAccountLinking(connectionID, safeData)
       })}/>
-    </>
+    </div>
   )
 }
 

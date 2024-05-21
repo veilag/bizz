@@ -1,36 +1,30 @@
-import {Dispatch, ReactNode, SetStateAction, useState} from "react";
-import {ArrowUpRight, LogOut, Settings, User} from "react-feather";
+import {Dispatch, ReactNode, SetStateAction} from "react";
+import {LogOut} from "react-feather";
 
-import {TelegramLogo} from "@/assets/icons";
 import {Theme, useTheme} from "@/components/theme.tsx";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import SettingsDialog from "@/components/dialogs/SettingsDialog.tsx";
 import {useAtomValue} from "jotai";
 import {userAtom} from "@/atoms/user.ts";
 
 interface BusinessViewMenuProps {
   children: ReactNode
+
   setLinking: Dispatch<SetStateAction<boolean>>
+  setSharing: Dispatch<SetStateAction<boolean>>
 }
 
-const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
+const ProfileMenu = ({ children, setLinking, setSharing }: BusinessViewMenuProps) => {
   const user = useAtomValue(userAtom)
-  const [isSettingsDialogOpen, setSettingsDialogOpen] = useState<boolean>(false)
   const {theme, setTheme} = useTheme()
 
   const logOut = () => {
@@ -40,13 +34,8 @@ const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
     window.location.reload()
   }
 
-  const handleSettingDialogOpen = (open: boolean) => {
-    setSettingsDialogOpen(open)
-  }
-
   return (
     <>
-      <SettingsDialog isOpen={isSettingsDialogOpen} onOpenChange={(open) => handleSettingDialogOpen(open)} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild className="w-full">
           {children}
@@ -58,52 +47,6 @@ const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
             <span className="px-2 text-muted-foreground text-sm">{user?.email}</span>
           </div>
           <DropdownMenuSeparator/>
-          <DropdownMenuGroup>
-            <DropdownMenuItem className="group">
-              <User className="mr-2 w-4 h-4 group-hover:animate-icon-pong"/>
-              <span>Профиль</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="group">
-                <Settings className="mr-2 w-4 h-4 group-hover:animate-icon-pong"/>
-                <span>Настройки</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="w-72">
-                  <DropdownMenuItem className="group" onClick={() => setSettingsDialogOpen(true)}>
-                    <ArrowUpRight className="mr-2 h-4 w-4 group-hover:animate-icon-pong" />
-                    Открыть
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>
-                    Основное
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem checked>
-                    Получать Telegram уведомления
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem checked>
-                    Сохранять черновики запросов
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="flex items-center">
-                    <TelegramLogo className="mr-2 w-4 h-4"/>
-                    Telegram
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem>
-                    Запретить вход через Telegram
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuItem onClick={() => setLinking(true)}>
-                    <span>Привязать аккаунт</span>
-                  </DropdownMenuItem>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator/>
           <DropdownMenuLabel>
             Оформление
           </DropdownMenuLabel>
@@ -111,8 +54,31 @@ const ProfileMenu = ({ children, setLinking }: BusinessViewMenuProps) => {
           <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as Theme)}>
             <DropdownMenuRadioItem value="light">Светлая</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="dark">Темная</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="system">Как в системе</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator/>
+          <DropdownMenuLabel>
+            Telegram
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator/>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setLinking(true)}>
+              <span>Привязать аккаунт</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          {user?.isDeveloper && (
+            <>
+              <DropdownMenuSeparator/>
+              <DropdownMenuLabel>
+                Разработчик
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator/>
+              <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setSharing(true)}>
+                    <span>Поделится доступом</span>
+                  </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          )}
           <DropdownMenuSeparator/>
           <DropdownMenuGroup>
             <DropdownMenuItem className="group text-red-500" onClick={() => logOut()}>

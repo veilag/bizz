@@ -50,32 +50,3 @@ def add_user(session: AsyncSession, username: str, raw_password: str, email: str
 
     session.add(new_user)
     return new_user
-
-
-class AuthSocketManager:
-    def __init__(self):
-        self.connections: Dict[str, Any] = {}
-
-    def get_connection(self, auth_id: str):
-        return self.connections.get(auth_id)
-
-    async def connect(self, uuid: str, user_id: int, websocket: WebSocket):
-        self.connections[uuid] = {
-            "user_id": user_id,
-            "connection": websocket
-        }
-
-        await websocket.send_json({
-            "auth_id": uuid
-        })
-
-    async def commit(self, uuid: str, status: str = "success"):
-        connection: WebSocket = self.connections[uuid]["connection"]
-        await connection.send_json({
-            "event": "COMMIT",
-            "status": status
-        })
-
-    async def disconnect(self, uuid: str, websocket: WebSocket):
-        self.connections.pop(uuid)
-        await websocket.close()

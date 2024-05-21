@@ -1,32 +1,33 @@
 import api from "@/api/index.ts";
 import {BusinessQuery} from "@/types/business.ts";
-import {queriesListAtom} from "@/atoms/queries.ts";
-import atomStore from "@/atoms";
 
 interface QueryGenerationRequestData {
   name: string
-  query: string
   description: string
-  city: string
 }
 
-const generateQuery = ({ name, query, description, city }: QueryGenerationRequestData) => {
-  return api.post("/business/generate", {
+const generateQuery = ({ name, description }: QueryGenerationRequestData) => {
+  return api.post("/business/create", {
     name,
-    query,
     description,
-    city
   })
 }
 
+const getQueryByID = (queryID: number) => {
+  return api.get<BusinessQuery>(`/business/${queryID}`)
+}
+
 const fetchQueries = () => {
-  api.get<BusinessQuery[]>("/business/list")
-    .then(res => {
-      atomStore.set(queriesListAtom, res.data)
-    })
+  return api.get<BusinessQuery[]>("/business/list")
+}
+
+const deleteQuery = (query_id: number) => {
+  return api.get(`/business/delete/${query_id}`)
 }
 
 export {
   generateQuery,
-  fetchQueries
+  fetchQueries,
+  getQueryByID,
+  deleteQuery
 }

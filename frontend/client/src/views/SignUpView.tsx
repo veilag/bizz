@@ -9,6 +9,7 @@ import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {toast} from "sonner";
+import {Logo} from "@/assets/icons";
 
 const SignUpView = () => {
   const [isLoading, setLoading] = useState<boolean>(false)
@@ -89,7 +90,10 @@ const SignUpView = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-screen">
+    <div className="flex relative flex-col items-center justify-center w-full h-screen">
+      <div className="absolute top-5 left-5">
+        <Logo className="w-14 h-14 text-white"/>
+      </div>
       <div className="w-96">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -104,59 +108,61 @@ const SignUpView = () => {
             <FormField
               control={form.control}
               name="username"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel className={`${isLoading && 'text-muted-foreground'}`}>Имя пользователя</FormLabel>
                   <FormControl>
                     <div className="flex gap-2">
-                      <div className="w-12 flex text-muted-foreground justify-center items-center rounded-md border border-input">
+                      <div
+                        className="w-12 flex text-muted-foreground justify-center items-center rounded-md border border-input">
                         @
                       </div>
                       <Input disabled={isLoading} type="text" {...field} />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
-              )} />
+              )}/>
             <FormField
               control={form.control}
               name="email"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem className="mt-2">
                   <FormLabel className={`${isLoading && 'text-muted-foreground'}`}>Электронная почта</FormLabel>
                   <FormControl>
                     <Input disabled={isLoading} type="text" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
-              )} />
+              )}/>
             <FormField
               control={form.control}
               name="password"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem className="mt-2">
                   <FormLabel className={`${isLoading && 'text-muted-foreground'}`}>Пароль</FormLabel>
                   <FormControl>
                     <Input disabled={isLoading} type="password" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
-              )} />
+              )}/>
             <FormField
               control={form.control}
               name="password_confirm"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem className="mt-2">
                   <FormLabel className={`${isLoading && 'text-muted-foreground'}`}>Повторите пароль</FormLabel>
                   <FormControl>
                     <Input disabled={isLoading} type="password" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
-              )} />
+              )}/>
 
             <div className="w-full flex gap-2 justify-center items-center mt-4">
-              <Button disabled={isLoading} className="w-full" type="submit">{isLoading ? (<Loader className="animate-spin" />) : 'Зарегистрироваться'}</Button>
+              <Button disabled={isLoading} className="w-full" type="submit">{isLoading ? (
+                <Loader className="animate-spin"/>) : 'Зарегистрироваться'}</Button>
             </div>
           </form>
         </Form>

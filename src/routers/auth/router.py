@@ -4,9 +4,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.deps import get_session
-from src.models import User
-from src.routers.auth.deps import current_user
-from src.routers.auth.schemas import TokenSchema, UserOut, UserAuth, TelegramAuth, TelegramUnsafeAuth
+from src.models import UserAssistant
+from src.routers.auth.deps import get_user_from_refresh_token
+from src.routers.auth.schemas import TokenSchema, UserOut, UserAuth, TelegramAuth, TelegramUnsafeAuth, RefreshSchema
 from src.routers.auth.service import get_user, add_user, update_user_telegram, get_user_by_telegram_id
 from src.service.socket import WebSocketManager
 from src.utils import verify_password, create_access_token, create_refresh_token
@@ -28,7 +28,7 @@ async def handle_user_signup(
     if user is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this name already exists"
+            detail="Пользователь с таким именем уже существует"
         )
 
     new_user = add_user(
@@ -37,6 +37,18 @@ async def handle_user_signup(
         raw_password=data.password,
         email=data.email
     )
+
+    await session.commit()
+
+    session.add(UserAssistant(
+        user_id=new_user.id,
+        assistant_id=1
+    ))
+
+    session.add(UserAssistant(
+        user_id=new_user.id,
+        assistant_id=2
+    ))
 
     await session.commit()
     return new_user
@@ -70,6 +82,19 @@ async def handle_user_login(
             "user_id": user.id
         })
     }
+
+
+@router.post("/refresh")
+async def refresh_access_token(
+        data: RefreshSchema,
+        session: AsyncSession = Depends(get_session)
+):
+    await get_user_from_refresh_token(
+        session=session,
+        refresh_token=data.refreshToken
+    )
+
+    return {"message": "OMG"}
 
 
 @router.post("/login/telegram", summary="Login user via linked Telegram account")

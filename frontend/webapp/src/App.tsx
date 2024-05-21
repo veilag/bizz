@@ -3,6 +3,11 @@ import {useEffect, useState} from "react";
 import {checkAuthentication} from "./actions/auth.ts";
 import LinkView from "./views/LinkView.tsx";
 import MainView from "./views/MainView.tsx";
+import {Loader} from "lucide-react";
+import TimeAgo from 'javascript-time-ago'
+import ru from 'javascript-time-ago/locale/ru'
+
+TimeAgo.addDefaultLocale(ru)
 
 const App = () => {
   const [isLinked, setLinked] = useState<boolean>(false)
@@ -18,18 +23,18 @@ const App = () => {
   }
 
   useEffect(() => {
-    handleAuth()
     expand()
+    handleAuth()
   }, []);
 
   if (isLoading) return (
-    <div className="flex flex-col items-center justify-center p-2 h-screen">
-      <h1>Loading...</h1>
+    <div className="flex flex-col items-center justify-center h-screen">
+      <Loader size={25} className="animate-spin"/>
     </div>
   )
 
   return (
-    <div className="flex flex-col items-center justify-center p-2 h-screen">
+    <div className="h-screen w-full">
       {!isLinked && <LinkView onSuccessLink={() => setLinked(true)}/>}
       {isLinked && <MainView/>}
     </div>

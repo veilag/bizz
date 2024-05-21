@@ -1,4 +1,10 @@
-import {QueryStatusUpdatePayload, TokenPayload, QueryCreatedPayload} from "@/types/payloads.ts";
+import {
+  QueryStatusUpdatePayload,
+  TokenPayload,
+  QueryCreatedPayload,
+  MessagePayload,
+  AssistantMessageUpdatePayload
+} from "@/types/payloads.ts";
 
 interface StringPayload {
   data: string
@@ -6,7 +12,7 @@ interface StringPayload {
 
 interface ConnectionMessage {
   event: string
-  payload: StringPayload | TokenPayload | QueryStatusUpdatePayload | QueryCreatedPayload
+  payload: StringPayload | TokenPayload | QueryStatusUpdatePayload | QueryCreatedPayload | MessagePayload | AssistantMessageUpdatePayload
 }
 
 export type {

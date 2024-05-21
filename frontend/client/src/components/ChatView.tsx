@@ -6,14 +6,14 @@ import {selectedQueryAtom} from "@/atoms/queries.ts";
 import {fetchMessage} from "@/api/message.ts";
 import AssistantsToolbar from "@/components/toolbars/AssistantsToolbar.tsx";
 import MessagesList from "@/components/lists/MessagesList.tsx";
-import ChatForm from "@/components/ChatForm.tsx";
+import ChatForm from "@/components/forms/ChatForm.tsx";
 
 const ChatView = () => {
   const selectedQuery = useAtomValue(selectedQueryAtom)
 
   useEffect(() => {
     if (!selectedQuery) return
-    fetchMessage(selectedQuery.messageGroupID)
+    fetchMessage(selectedQuery.id)
   }, [selectedQuery]);
 
   if (!selectedQuery) {
@@ -29,15 +29,6 @@ const ChatView = () => {
     <div className="flex flex-col flex-1">
       <MessagesList/>
       <Separator/>
-      {/*<div className="flex text-xs py-1 px-2 items-center cursor-default">*/}
-      {/*  <span className="mr-2">@rgaliev печатает</span>*/}
-      {/*  <div className="flex gap-0.5 mt-[2px]">*/}
-      {/*    <span className="w-1 h-1 delay-0 bg-muted-foreground rounded-full animate-bounce"></span>*/}
-      {/*    <span className="w-1 h-1 delay-200 bg-muted-foreground rounded-full animate-bounce"></span>*/}
-      {/*    <span className="w-1 h-1 delay-400 bg-muted-foreground rounded-full animate-bounce"></span>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-      {/*<Separator/>*/}
       <AssistantsToolbar/>
       <Separator/>
       <ChatForm/>

@@ -1,14 +1,16 @@
 import uuid
-from asyncio import create_task
 from aiogram.types import Update
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from sqlalchemy import select
 
-from src.bot.middleware import ExternalURL
+from src.bot.middleware import Data
 from src.database import init_models
-from src.service.queue import QueueManager
+from src.database.deps import get_session
+from src.models import Assistant, User, UserAssistant
+from src.service.queue import AssistantManager
 from src.bot import bot, dispatcher
 from pyngrok import ngrok
 from src.config import cfg
@@ -19,15 +21,75 @@ from src.routers.business.router import router as business_router
 from src.routers.message.router import router as message_router
 from src.routers.user.router import router as user_router
 from src.routers.assistant.router import router as assistant_router
+from src.utils import get_hashed_password
 
 app = FastAPI(
     title="BizzAI App",
     version="0.0.1",
 )
 
+
+async def init_assistants():
+    async for session in get_session():
+        try:
+            admin_user_in_db = await session.execute(
+                select(User)
+                .where(User.id == 1)
+            )
+
+            if (admin_user_in_db.scalars().one_or_none()):
+                return
+
+            admin_user = User(
+                username="bizz",
+                password=get_hashed_password(cfg.admin_password),
+                email="bizz@mail.ru",
+                is_developer=True
+            )
+
+            session.add(admin_user)
+            await session.commit()
+
+            bizz_generation_assistant = Assistant(
+                id=1,
+                username="bizz_generation",
+                created_by=admin_user.id,
+                description="",
+                name="✨ Генератор бизнес-плана",
+                code="",
+                is_data_accessible=True
+            )
+
+            bizz_assistant = Assistant(
+                id=2,
+                username="bizz_assistant",
+                description="",
+                created_by=admin_user.id,
+                name="🚀 Bizzy Ассистент",
+                code="",
+                is_data_accessible=False
+            )
+
+            session.add(bizz_assistant)
+            session.add(bizz_generation_assistant)
+            await session.commit()
+
+            session.add(UserAssistant(
+                user_id=admin_user.id,
+                assistant_id=bizz_generation_assistant.id
+            ))
+
+            session.add(UserAssistant(
+                user_id=admin_user.id,
+                assistant_id=bizz_assistant.id
+            ))
+
+            await session.commit()
+
+        except Exception as ignored:
+            await session.rollback()
+
 origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:5173"
@@ -42,7 +104,7 @@ app.add_middleware(
 )
 
 app.socket_manager = WebSocketManager()
-app.queue_manager = QueueManager(app.socket_manager)
+app.queue_manager = AssistantManager(app.socket_manager)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth_router)
@@ -51,7 +113,8 @@ app.include_router(message_router)
 app.include_router(user_router)
 app.include_router(assistant_router)
 
-tunnel = ngrok.connect(addr=cfg.base_url)
+ngrok.set_auth_token("2SCxRNVNlPsTokorZlP2G49LXEy_4yN55MY1VtGf8tYGazeH2")
+tunnel = ngrok.connect(addr=cfg.base_url, name="Dev API")
 WEBHOOK_PATH = f"/bot/{cfg.telegram_bot_token}"
 WEBHOOK_URL = f"{tunnel.public_url}{WEBHOOK_PATH}"
 
@@ -59,9 +122,13 @@ WEBHOOK_URL = f"{tunnel.public_url}{WEBHOOK_PATH}"
 @app.on_event("startup")
 async def on_startup():
     await init_models()
-    create_task(app.queue_manager.process_queue())
+    await init_assistants()
 
-    dispatcher.message.middleware(ExternalURL(tunnel.public_url))
+    dispatcher.message.middleware(Data(
+        url=tunnel.public_url,
+        app=app
+    ))
+
     webhook_info = await bot.get_webhook_info()
 
     if webhook_info != WEBHOOK_URL:

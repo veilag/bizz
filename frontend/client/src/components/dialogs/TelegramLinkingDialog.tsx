@@ -16,8 +16,6 @@ interface TelegramLinkingAlertProps {
 }
 
 const TelegramLinkingDialog = ({open, onLink, onClose }: TelegramLinkingAlertProps) => {
-  // const {toast} = useToast()
-
   const [connectionID, setConnectionID] = useState<string>("")
   const [isLoading, setLoading] = useState<boolean>(false)
 

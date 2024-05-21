@@ -16,6 +16,9 @@ class BaseConfig(Config):
     refresh_token_expire_minutes: int = field("REFRESH_TOKEN_EXPIRE_MINUTES", caster=to_int, default=(60 * 24 * 7))
     hashing_algorithm: str = field("HASHING_ALGORITHM", default="HS256")
 
+    ai_key: str = field("AI_KEY")
+    admin_password: str = field("ADMIN_PASSWORD")
+
     mode: str = field("MODE", default="DEV")
 
 

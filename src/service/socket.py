@@ -1,7 +1,12 @@
 from typing import TypedDict, Dict, Any
+
+import requests
 from fastapi import WebSocket
 from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import cfg
 from src.database.deps import get_session
 from src.models import User
 from src.routers.auth.deps import check_user
@@ -35,7 +40,7 @@ class WebSocketManager:
         await websocket.accept()
         self.unauthorized_connections[connection_id] = websocket
 
-    async def send_to_user(self, user_id: int, event: str, payload: Dict[str, Any] = None):
+    async def send_to_user(self, session: AsyncSession, user_id: int, event: str, payload: Dict[str, Any] = None):
         user_connections = self.active_connections.get(user_id)
 
         for connection in user_connections:
@@ -46,6 +51,37 @@ class WebSocketManager:
                     "data": payload
                 }
             })
+
+        user_query = await session.execute(
+            select(User)
+            .where(User.id == user_id)
+        )
+
+        user: User = user_query.scalars().one()
+
+        if not user.telegram_id:
+            return
+
+        if event == "USER_MESSAGE":
+            if payload.get("fromTelegram"):
+                return
+
+            user_message = f"📨 *Вы через сайт*\n{payload.get("content")}"
+
+            url = f'https://api.telegram.org/bot{cfg.telegram_bot_token}/sendMessage'
+            params = {'chat_id': user.telegram_id, 'text': user_message, 'disable_notification': True, 'parse_mode': 'Markdown'}
+            requests.get(url, params=params)
+
+        elif event == "ASSISTANT_MESSAGE_UPDATE":
+            if payload.get("plainContentUpdate") == "error":
+                return
+
+            assistant_message = payload.get("plainContentUpdate")
+            if payload.get("isWidget"):
+                assistant_message = "⚠️ *Сообщение является виджетом*\n_Для работы с ним откройте сайт_\n\n" + assistant_message
+            url = f'https://api.telegram.org/bot{cfg.telegram_bot_token}/sendMessage'
+            params = {'chat_id': user.telegram_id, 'text': assistant_message, 'disable_notification': True, 'parse_mode': 'Markdown'}
+            requests.get(url, params=params)
 
     def authorize_connection(self, user_id: int, connection_id: str):
         unauthorized_connection = self.unauthorized_connections.get(connection_id)

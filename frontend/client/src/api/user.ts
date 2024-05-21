@@ -1,14 +1,30 @@
 import api from "@/api/index.ts";
-import {User, userAtom} from "@/atoms/user.ts";
-import atomStore from "@/atoms";
+import {User} from "@/atoms/user.ts";
 
 const fetchUserCredentials = () => {
-  api.get<User>("/users/me")
-    .then(res => {
-      atomStore.set(userAtom, res.data)
-    })
+  return api.get<User>("/users/me")
+}
+
+const updateUserSelectedAssistant = (assistantID: number) => {
+  api.post("/business/selection/update/assistant", {
+    "assistantID": assistantID
+  })
+}
+
+const updateUserSelectedQuery = (queryID: number) => {
+  api.post("/business/selection/update/query", {
+    "queryID": queryID
+  })
+}
+
+const shareDeveloperPermission = (username: string) => {
+  return api.get(`/users/share/permission/${username}`)
 }
 
 export {
-  fetchUserCredentials
+  fetchUserCredentials,
+
+  updateUserSelectedAssistant,
+  updateUserSelectedQuery,
+  shareDeveloperPermission
 }

@@ -35,9 +35,7 @@ const NewBusinessPlanDialog = ({ children }: NewBusinessPlanDialogProps) => {
 
     generateQuery({
       name: data.name,
-      query: data.query,
       description: data.description,
-      city: data.city
     })
       .then(() => onSuccessGenerationQuery())
       .catch(() => onErrorGenerationQuery())
@@ -51,10 +49,9 @@ const NewBusinessPlanDialog = ({ children }: NewBusinessPlanDialogProps) => {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Генерация нового плана</DialogTitle>
+          <DialogTitle>Создание нового плана</DialogTitle>
           <DialogDescription>
-            Генерация плана будет ожидать своей очереди,
-            статус генерации можно посмотреть в списке планов
+            После создания плана, вы сможете сгенерировать информацию о бизнесе
           </DialogDescription>
         </DialogHeader>
 

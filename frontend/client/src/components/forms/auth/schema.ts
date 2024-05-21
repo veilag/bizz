@@ -1,7 +1,7 @@
 import {z} from "zod";
 
 const loginSchema = z.object({
-  username: z.string().min(6, {
+  username: z.string().min(3, {
     message: "Введите не менее 6 символов"
   }).max(30),
 

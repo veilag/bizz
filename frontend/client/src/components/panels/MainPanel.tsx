@@ -8,21 +8,20 @@ import TelegramLinkingDialog from "@/components/dialogs/TelegramLinkingDialog.ts
 import MainPanelNavigation from "@/components/MainPanelNavigation.tsx";
 import {userAtom} from "@/atoms/user.ts";
 import {useAtomValue} from "jotai";
+import DeveloperAccessSharingDialog from "@/components/dialogs/DeveloperAccessSharingDialog.tsx";
 
 const MainPanel = () => {
   const user = useAtomValue(userAtom)
-  const [isLinking, setLinking] = useState<boolean>(false)
 
-  const handleLinking = () => {
-    setLinking(false)
-  }
+  const [isLinking, setLinking] = useState<boolean>(false)
+  const [isSharing, setSharing] = useState<boolean>(false)
 
   return (
     <>
       <ResizablePanel minSize={15} maxSize={25} defaultSize={20}>
         <div className="flex flex-col w-full h-full">
           <header className="w-full h-14 flex justify-center items-center px-2">
-            <ProfileMenu setLinking={setLinking}>
+            <ProfileMenu setSharing={setSharing} setLinking={setLinking}>
               <Button variant="outline" className="w-full justify-between">
                 @ {user?.username}
                 <User size={18}/>
@@ -36,7 +35,8 @@ const MainPanel = () => {
         </div>
       </ResizablePanel>
 
-      <TelegramLinkingDialog open={isLinking} onClose={() => setLinking(false)} onLink={() => handleLinking()}/>
+      <TelegramLinkingDialog open={isLinking} onClose={() => setLinking(false)} onLink={() => setLinking(false)}/>
+      <DeveloperAccessSharingDialog open={isSharing} onClose={() => setSharing(false)} />
     </>
   )
 }

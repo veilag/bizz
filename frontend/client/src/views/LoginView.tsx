@@ -11,7 +11,7 @@ import {useNavigate} from "react-router-dom";
 import {AxiosError, AxiosResponse} from "axios";
 import {TokenResponse} from "@/types/auth.ts";
 import {TokenPayload} from "@/types/payloads.ts";
-import {TelegramLogo} from "@/assets/icons";
+import {Logo, TelegramLogo} from "@/assets/icons";
 import {toast} from "sonner";
 import {loginUser} from "@/api/auth.ts";
 import LoginForm from "@/components/forms/auth/LoginForm.tsx";
@@ -163,7 +163,10 @@ const LoginView = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center w-full h-screen">
+    <div className="flex items-center relative justify-center w-full h-screen">
+      <div className="absolute top-5 left-5">
+        <Logo className="w-14 h-14" />
+      </div>
       <div className="w-96">
         <LoginForm
           onSubmit={(data) => onSubmit(data)}

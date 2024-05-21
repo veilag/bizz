@@ -1,28 +1,38 @@
 import {TooltipWrapper} from "@/components/util/ui.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {ArrowLeft, Maximize2, Minimize2, MoreVertical, RefreshCw, Trash} from "react-feather";
+import {ArrowLeft, Maximize2, Minimize2, MoreVertical, Trash} from "react-feather";
 import BusinessViewMenu from "@/components/dropdowns/BusinessViewMenu.tsx";
 import {useAtom, useSetAtom} from "jotai";
-import {selectedQueryAtom} from "@/atoms/queries.ts";
+import {queriesListAtom, selectedQueryAtom} from "@/atoms/queries.ts";
 import {messageListAtom} from "@/atoms/message.ts";
-import {fetchMessage} from "@/api/message.ts";
+import {deleteQuery} from "@/api/queries.ts";
 
 interface BusinessViewToolbarProps {
   isPanelCollapsed: boolean
   onPanelCollapse: () => void
+  onClose: () => void
 }
 
-const BusinessChatToolbar = ({ isPanelCollapsed, onPanelCollapse }: BusinessViewToolbarProps) => {
+const BusinessChatToolbar = ({ isPanelCollapsed, onPanelCollapse, onClose }: BusinessViewToolbarProps) => {
   const [selectedQuery, setSelectedQuery] = useAtom(selectedQueryAtom)
+  const setQueriesList = useSetAtom(queriesListAtom)
   const setMessagesList = useSetAtom(messageListAtom)
 
   const handleChatClose = () => {
     setSelectedQuery(undefined)
     setMessagesList([])
+
+    onClose()
   }
 
-  const handleMessageListRefetch = () => {
-    fetchMessage(selectedQuery?.messageGroupID)
+  const handleQueryDelete = () => {
+    if (!selectedQuery) return
+
+    deleteQuery(selectedQuery.id)
+      .then(() => {
+        setSelectedQuery(undefined)
+        setQueriesList(prev => prev.filter(query => query.id !== selectedQuery.id))
+      })
   }
 
   return (
@@ -34,17 +44,17 @@ const BusinessChatToolbar = ({ isPanelCollapsed, onPanelCollapse }: BusinessView
           </Button>
         </TooltipWrapper>
         <TooltipWrapper hint="Удалить план">
-          <Button disabled={selectedQuery === undefined} size="icon" variant="ghost">
+          <Button
+            onClick={() => handleQueryDelete()}
+            disabled={selectedQuery === undefined}
+            size="icon"
+            variant="ghost"
+          >
             <Trash size={18}/>
           </Button>
         </TooltipWrapper>
       </div>
       <div className="flex">
-        <TooltipWrapper hint="Обновить диалог">
-          <Button disabled={selectedQuery === undefined} size="icon" variant="ghost">
-            <RefreshCw onClick={() => handleMessageListRefetch()} size={18}/>
-          </Button>
-        </TooltipWrapper>
         <TooltipWrapper hint="Размер окна">
           <Button disabled={selectedQuery === undefined} onClick={() => onPanelCollapse()} size="icon" variant="ghost">
             {!isPanelCollapsed ? <Maximize2 size={18}/> : <Minimize2 size={18}/>}

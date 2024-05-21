@@ -9,6 +9,13 @@ const BusinessDashboardView = () => {
   const [isListPanelCollapsed, setListPaneCollapsed] = useState<boolean>(false)
   const listPanelRef = useRef<ImperativePanelHandle>(null)
 
+  const openCollapsedPanel = () => {
+    if (!listPanelRef.current) return;
+
+    listPanelRef.current.expand()
+    setListPaneCollapsed(false)
+  }
+
   const handleCollapsing = () => {
     if (!listPanelRef.current) return;
 
@@ -44,7 +51,9 @@ const BusinessDashboardView = () => {
       <ResizableHandle withHandle/>
       <BusinessChatPanel
         isPanelCollapsed={isListPanelCollapsed}
+
         onPanelCollapse={() => handleCollapsing()}
+        onClose={() => openCollapsedPanel()}
       />
 
     </ResizablePanelGroup>

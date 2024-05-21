@@ -6,6 +6,7 @@ import SignUpView from "@/views/SignUpView.tsx";
 import BusinessDashboardView from "@/views/BusinessDashboardView.tsx";
 import NotFound from "@/views/NotFound.tsx";
 import AssistantsView from "@/views/AssistantsView.tsx";
+import AssistantEditorView from "@/views/AssistantEditorView.tsx";
 
 const router = createBrowserRouter([
   {
@@ -25,8 +26,8 @@ const router = createBrowserRouter([
         element: <AssistantsView />
       },
       {
-        path: '/tags',
-        element: <p>Tags</p>
+        path: '/editor',
+        element: <AssistantEditorView/>
       },
       {
         path: '/help',
