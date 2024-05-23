@@ -122,17 +122,17 @@ async def on_startup():
     await init_models()
     await init_assistants()
 
-    dispatcher.message.middleware(Data(
-        url="https://bizz-ai",
-        app=app
-    ))
-
-    webhook_info = await bot.get_webhook_info()
-
-    if webhook_info != WEBHOOK_URL:
-        await bot.set_webhook(
-            url=WEBHOOK_URL
-        )
+    # dispatcher.message.middleware(Data(
+    #     url="https://bizz-ai",
+    #     app=app
+    # ))
+    #
+    # webhook_info = await bot.get_webhook_info()
+    #
+    # if webhook_info != WEBHOOK_URL:
+    #     await bot.set_webhook(
+    #         url=WEBHOOK_URL
+    #     )
 
 
 @app.post(WEBHOOK_PATH, include_in_schema=False)

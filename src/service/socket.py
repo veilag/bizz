@@ -66,7 +66,7 @@ class WebSocketManager:
             if payload.get("fromTelegram"):
                 return
 
-            user_message = f"📨 *Вы через сайт*\n{payload.get("content")}"
+            user_message = f"📨 *Вы через сайт*\n{payload.get('content')}"
 
             url = f'https://api.telegram.org/bot{cfg.telegram_bot_token}/sendMessage'
             params = {'chat_id': user.telegram_id, 'text': user_message, 'disable_notification': True, 'parse_mode': 'Markdown'}
