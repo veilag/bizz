@@ -10,7 +10,7 @@ from src.routers.auth.deps import current_user
 from src.routers.assistant import service
 
 router = APIRouter(
-    prefix="/assistants",
+    prefix="/api/assistants",
     tags=["assistants"]
 )
 

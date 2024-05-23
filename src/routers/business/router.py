@@ -9,7 +9,7 @@ from src.routers.business import service
 from src.service.socket import WebSocketManager
 
 router = APIRouter(
-    prefix="/business",
+    prefix="/api/business",
     tags=["generations", "business"]
 )
 

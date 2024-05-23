@@ -10,7 +10,7 @@ from src.service.queue import AssistantManager
 from src.service.socket import WebSocketManager
 
 router = APIRouter(
-    prefix="/message",
+    prefix="/api/message",
     tags=["messages"]
 )
 

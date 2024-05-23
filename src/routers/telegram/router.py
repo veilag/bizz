@@ -8,7 +8,7 @@ from src.routers.business.service import get_all_user_business, update_user_sele
 from src.routers.telegram.deps import telegram_user
 
 router = APIRouter(
-    prefix="/telegram",
+    prefix="/api/telegram",
     tags=["telegram"]
 )
 

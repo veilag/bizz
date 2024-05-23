@@ -13,7 +13,7 @@ from src.utils import verify_password, create_access_token, create_refresh_token
 from src.bot import bot
 
 router = APIRouter(
-    prefix="/auth",
+    prefix="/api/auth",
     tags=["auth"]
 )
 

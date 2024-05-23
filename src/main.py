@@ -144,7 +144,7 @@ async def process_bot_update(update: dict):
     await dispatcher.feed_update(update=update, bot=bot)
 
 
-@app.websocket("/")
+@app.websocket("/ws")
 async def handle_websocket(websocket: WebSocket):
     connection_id: str = str(uuid.uuid4())
 

@@ -8,7 +8,7 @@ from src.routers.auth.schemas import UserOut
 from src.routers.user.service import share_access, get_user_by_name
 
 router = APIRouter(
-    prefix="/users",
+    prefix="/api/users",
     tags=["users"]
 )
 
