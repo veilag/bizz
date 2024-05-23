@@ -12,6 +12,7 @@ interface BusinessChatPanel {
 const BusinessChatPanel = ({isPanelCollapsed, onPanelCollapse, onClose}: BusinessChatPanel) => {
   return (
     <ResizablePanel
+      id="chat-panel"
       className="flex flex-col"
       defaultSize={70}
     >

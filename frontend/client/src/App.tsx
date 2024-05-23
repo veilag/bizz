@@ -11,6 +11,7 @@ import TimeAgo from 'javascript-time-ago'
 import ru from 'javascript-time-ago/locale/ru'
 import {Provider} from "jotai";
 import atomStore from "@/atoms";
+import GuideProvider from "@/components/guide/GuideProvider.tsx";
 
 TimeAgo.addDefaultLocale(ru)
 
@@ -32,6 +33,8 @@ const App = () => {
           />
           <RouterProvider router={router}/>
         </TooltipProvider>
+        <GuideProvider />
+
       </ThemeProvider>
     </Provider>
   )

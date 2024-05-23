@@ -26,11 +26,11 @@ const LoginForm = ({ onSubmit, isLoading, isCodeShowed }: LoginFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="mb-4">
-          <h2 className="font-bold text-lg">
-            Авторизация
+        <div className="mb-7">
+          <h2 className="font-bold text-center text-2xl">
+            Добро пожаловать
           </h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-center">
             Войдите в систему BizzAI
           </p>
         </div>
@@ -45,7 +45,7 @@ const LoginForm = ({ onSubmit, isLoading, isCodeShowed }: LoginFormProps) => {
                   <div className="w-12 flex text-muted-foreground justify-center items-center rounded-md border border-input">
                     @
                   </div>
-                  <Input disabled={isCodeShowed || isLoading} type="text" {...field} />
+                  <Input disabled={isLoading} type="text" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -58,14 +58,14 @@ const LoginForm = ({ onSubmit, isLoading, isCodeShowed }: LoginFormProps) => {
             <FormItem className="mt-2">
               <FormLabel className={`${(isCodeShowed || isLoading) && 'text-muted-foreground'}`}>Пароль</FormLabel>
               <FormControl>
-                <Input disabled={isCodeShowed || isLoading} type="password" {...field} />
+                <Input disabled={isLoading} type="password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )} />
 
         <div className="w-full flex gap-2 justify-center items-center mt-4">
-          <Button disabled={isCodeShowed || isLoading} className="w-full" type="submit">{isLoading ? (<Loader className="animate-spin" />) : 'Авторизоваться'}</Button>
+          <Button disabled={isLoading} className="w-full" type="submit">{isLoading ? (<Loader className="animate-spin" />) : 'Авторизоваться'}</Button>
         </div>
       </form>
     </Form>

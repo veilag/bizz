@@ -11,18 +11,23 @@ import {z} from "zod";
 import {generateQuery} from "@/api/queries.ts";
 import NewBusinessPlanForm from "@/components/forms/newBusinessQuery/NewBusinessPlanForm.tsx";
 import schema from "@/components/forms/newBusinessQuery/schema.ts";
+import {useSetAtom} from "jotai/index";
+import {guideStateAtom} from "@/atoms/guide.ts";
 
 interface NewBusinessPlanDialogProps {
   children: ReactNode
 }
 
 const NewBusinessPlanDialog = ({ children }: NewBusinessPlanDialogProps) => {
+  const setState = useSetAtom(guideStateAtom)
+
   const [isLoading, setLoading] = useState<boolean>(false)
   const [isOpen, setOpen] = useState<boolean>(false)
 
   const onSuccessGenerationQuery = () => {
     setOpen(false)
     setLoading(false)
+    setState("planExplanation")
   }
 
   const onErrorGenerationQuery = () => {

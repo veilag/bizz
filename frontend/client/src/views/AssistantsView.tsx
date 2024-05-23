@@ -14,7 +14,6 @@ import {
 } from "@/atoms/assistant.ts";
 import {Input} from "@/components/ui/input.tsx";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
-import NewAssistantDialog from "@/components/dialogs/NewAssistantDialog.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import Markdown from "react-markdown";
 import {Check} from "lucide-react";
@@ -23,8 +22,12 @@ import {useNavigate} from "react-router-dom";
 import atomStore from "@/atoms";
 import {toast} from "sonner";
 import AnimateIn from "@/components/ui/animate.ts";
+import {useSetAtom} from "jotai/index";
+import {guideStateAtom} from "@/atoms/guide.ts";
 
 const AssistantsView = () => {
+  const setState = useSetAtom(guideStateAtom)
+
   const [isLoading, setLoading] = useState<boolean>(false)
   const user = useAtomValue(userAtom)
   const assistants = useAtomValue(assistantsAtom)
@@ -69,6 +72,8 @@ const AssistantsView = () => {
         atomStore.set(assistantsAtom, res.data)
         setLoading(false)
       })
+
+    setState("assistants")
   }, [])
 
   return (
@@ -103,6 +108,7 @@ const AssistantsView = () => {
                     from="opacity-0 scale-90 -translate-y-4"
                     to="opacity-100 scale-100 translate-y-0 translate-x-0"
                     delay={50 * index}
+                    key={assistant.id}
                     duration={300}
                     as="li"
                     className={`group ${assistant.id === selectedAssistant?.id ? 'active' : ''}`}
@@ -159,7 +165,6 @@ const AssistantsView = () => {
                 <div className="flex items-center gap-2">
                   {user?.id === selectedAssistant.createdBy && (
                     <div className="flex items-center gap-1">
-                      <NewAssistantDialog assistant={selectedAssistant} type="update">
                         <Button onClick={() => navigate('/editor', {
                           state: {
                             edit: true
@@ -168,7 +173,6 @@ const AssistantsView = () => {
                           <Edit3 className="mr-2" size={18} />
                           Редактировать
                         </Button>
-                      </NewAssistantDialog>
                     </div>
                   )}
 

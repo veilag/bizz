@@ -113,7 +113,7 @@ const MessagesList = () => {
         break
 
       case "ASSISTANT_MESSAGE_UPDATE":
-        if (lastJsonMessage.payload.data.status === "LOADING") {
+        if ((lastJsonMessage.payload.data as {status: string}).status === "LOADING") {
           setMessages(prev => prev.map(messageInList => {
             if (messageInList.id === ((lastJsonMessage.payload) as AssistantMessageUpdatePayload).data.messageID) {
               return {

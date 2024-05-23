@@ -74,6 +74,22 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "rotate-in": {
+          "0%": {
+            transform: "rotate(0deg)"
+          },
+          "100%": {
+            transform: "rotate(360deg)"
+          }
+        },
+        "rotate-out": {
+          "0%": {
+            transform: "rotate(0deg)"
+          },
+          "100%": {
+            transform: "rotate(-360deg)"
+          }
+        },
         "line-loader": {
           "0%": {
             left: "-40%"
@@ -103,7 +119,9 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "line-loader": "line-loader 1s linear infinite",
-        "icon-pong": "icon-pong 0.4s cubic-bezier(0, 0.52, 0.48, 1.28);"
+        "icon-pong": "icon-pong 0.4s cubic-bezier(0, 0.52, 0.48, 1.28);",
+        "rotate-in": "rotate-in 10s linear infinite",
+        "rotate-out": "rotate-out 10s linear infinite"
       },
     },
   },

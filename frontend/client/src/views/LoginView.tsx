@@ -16,8 +16,12 @@ import {toast} from "sonner";
 import {loginUser} from "@/api/auth.ts";
 import LoginForm from "@/components/forms/auth/LoginForm.tsx";
 import {loginSchema} from "@/components/forms/auth/schema.ts";
+import {useSetAtom} from "jotai";
+import {guideStateAtom} from "@/atoms/guide.ts";
 
 const LoginView = () => {
+  const setGuideState = useSetAtom(guideStateAtom)
+
   const [isLoading, setLoading] = useState<boolean>(false)
   const [isCodeShowed, setCodeShowed] = useState<boolean>(false)
 
@@ -81,6 +85,8 @@ const LoginView = () => {
     navigate("/list", {
       replace: true
     })
+
+    setGuideState("start")
   }
 
   const onErrorLogin = (error: AxiosError) => {
@@ -164,29 +170,36 @@ const LoginView = () => {
 
   return (
     <div className="flex items-center relative justify-center w-full h-screen">
-      <div className="absolute top-5 left-5">
-        <Logo className="w-14 h-14" />
+      <div className="absolute w-full translate-y-[-50%] h-full flex justify-center gap-2 z-0">
+        <div className="w-96 h-96 origin-right opacity-50 bg-red-500 animate-rotate-out blur-[100px]"></div>
+        <div className="w-96 h-96 origin-left opacity-50 bg-purple-500 animate-rotate-in delay-1000 blur-[100px]"></div>
       </div>
-      <div className="w-96">
-        <LoginForm
-          onSubmit={(data) => onSubmit(data)}
-          isLoading={isLoading}
-          isCodeShowed={isCodeShowed} />
+      <div className="absolute w-full h-full flex justify-center items-start z-5">
+        <Logo className="w-20 h-20 mt-10 duration-200 hover:cursor-pointer hover:scale-125 transition-all ease-out"/>
+      </div>
 
-        <Button
-          disabled={isLoading}
-          onClick={() => handleLoginViaTelegram()}
-          className="w-full mt-2 bg-blue-500 text-white hover:bg-blue-600"
-        >
-          <TelegramLogo className="mr-2"/> Войти через Telegram
-        </Button>
-        <Button
-          onClick={() => navigate("/signup")}
-          variant="link"
-          className="w-full mt-2"
-        >
-          Зарегистрироваться
-        </Button>
+      <div className="p-6 z-10">
+        <div className="w-96">
+          <LoginForm
+            onSubmit={(data) => onSubmit(data)}
+            isLoading={isLoading}
+            isCodeShowed={isCodeShowed}/>
+
+          <Button
+            disabled={isLoading}
+            onClick={() => handleLoginViaTelegram()}
+            className="w-full mt-2 bg-blue-500 text-white hover:bg-blue-600"
+          >
+            <TelegramLogo className="mr-2"/> Войти через Telegram
+          </Button>
+          <Button
+            onClick={() => navigate("/signup")}
+            variant="link"
+            className="w-full mt-2"
+          >
+            Зарегистрироваться
+          </Button>
+        </div>
       </div>
 
       {transition((style, item) =>
@@ -203,7 +216,7 @@ const LoginView = () => {
                       <div className="overflow-clip rounded-2xl inline-block mt-3">
                         {connectionID !== "" && <QRCode size={250} eyeRadius={5} value={connectionID}/>}
                         {connectionID === "" &&
-                          <div className="w-[270px] h-[270px] bg-white text-black flex justify-center items-center"><Loader
+                            <div className="w-[270px] h-[270px] bg-white text-black flex justify-center items-center"><Loader
                                 className="animate-spin"/></div>}
                       </div>
                   </div>

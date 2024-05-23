@@ -89,7 +89,7 @@ const ChatForm = () => {
             <DropdownMenuSeparator />
             <DropdownMenuGroup className="flex flex-col gap-1">
               {userAssistants.map(assistant => (
-                <DropdownMenuItem className={`${assistant.id === selectedUserAssistant?.id && 'bg-muted'}`} onClick={() => handleAssistantSelect(assistant)}>
+                <DropdownMenuItem key={assistant.id} className={`${assistant.id === selectedUserAssistant?.id && 'bg-muted'}`} onClick={() => handleAssistantSelect(assistant)}>
                   <span>{assistant.name}</span>
                 </DropdownMenuItem>
               ))}

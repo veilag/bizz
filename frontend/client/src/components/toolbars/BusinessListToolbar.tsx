@@ -7,7 +7,7 @@ const BusinessListToolbar = () => {
     <header className="h-14 text-lg flex justify-between items-center px-4">
       <h2 className="font-semibold">Мои бизнес-планы</h2>
       <NewBusinessPlanDialog>
-        <Button size="icon" variant="ghost">
+        <Button id="new-plan-button" size="icon" variant="ghost">
           <Plus size={18} />
         </Button>
       </NewBusinessPlanDialog>

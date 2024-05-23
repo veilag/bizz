@@ -90,9 +90,7 @@ async def init_assistants():
             await session.rollback()
 
 origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:5173"
+    "https://bizz-ai",
 ]
 
 app.add_middleware(
@@ -113,10 +111,10 @@ app.include_router(message_router)
 app.include_router(user_router)
 app.include_router(assistant_router)
 
-ngrok.set_auth_token("2SCxRNVNlPsTokorZlP2G49LXEy_4yN55MY1VtGf8tYGazeH2")
-tunnel = ngrok.connect(addr=cfg.base_url, name="Dev API")
+# ngrok.set_auth_token("2SCxRNVNlPsTokorZlP2G49LXEy_4yN55MY1VtGf8tYGazeH2")
+# tunnel = ngrok.connect(addr=cfg.base_url, name="Dev API")
 WEBHOOK_PATH = f"/bot/{cfg.telegram_bot_token}"
-WEBHOOK_URL = f"{tunnel.public_url}{WEBHOOK_PATH}"
+WEBHOOK_URL = f"https://bizz-ai{WEBHOOK_PATH}"
 
 
 @app.on_event("startup")
@@ -125,7 +123,7 @@ async def on_startup():
     await init_assistants()
 
     dispatcher.message.middleware(Data(
-        url=tunnel.public_url,
+        url="https://bizz-ai",
         app=app
     ))
 
@@ -173,12 +171,9 @@ async def send_client():
 
 @app.get("/webapp", description="Send webapp")
 async def send_webapp():
-    return FileResponse(path="static/webapp/index.html", headers={
-        "ngrok-skip-browser-warning": "2024"
-    })
+    return FileResponse(path="static/webapp/index.html")
 
 
 @app.on_event("shutdown")
 async def on_shutdown():
-    ngrok.disconnect(tunnel.public_url)
     await bot.session.close()

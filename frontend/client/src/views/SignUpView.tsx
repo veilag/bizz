@@ -70,11 +70,7 @@ const SignUpView = () => {
 
         switch (error.code) {
           case "ERR_BAD_REQUEST":
-            toast.warning("Имя пользователя занято", {
-              classNames: {
-                toast: "w-fit"
-              }
-            })
+            toast.warning("Имя пользователя занято")
             break
 
           case "ERR_NETWORK":
@@ -91,17 +87,23 @@ const SignUpView = () => {
 
   return (
     <div className="flex relative flex-col items-center justify-center w-full h-screen">
-      <div className="absolute top-5 left-5">
-        <Logo className="w-14 h-14 text-white"/>
+      <div className="absolute w-full translate-y-[-50%] h-full flex justify-center gap-2 z-0">
+        <div className="w-96 h-96 origin-right opacity-50 bg-blue-500 animate-rotate-out blur-[100px]"></div>
+        <div className="w-96 h-96 origin-left opacity-50 bg-purple-500 animate-rotate-in delay-1000 blur-[100px]"></div>
       </div>
-      <div className="w-96">
+
+      <div className="absolute w-full h-full flex justify-center items-start z-5">
+        <Logo className="w-20 h-20 mt-10 duration-200 hover:cursor-pointer hover:scale-125 transition-all ease-out"/>
+      </div>
+
+      <div className="w-96 z-10">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="mb-4">
-              <h2 className="font-bold text-lg">
-                Регистрация
+            <div className="mb-7">
+              <h2 className="font-bold text-center text-2xl">
+                Давайте знакомиться
               </h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-center">
                 Станьте новым пользователем BizzAI
               </p>
             </div>
