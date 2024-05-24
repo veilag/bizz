@@ -174,6 +174,11 @@ async def send_webapp():
     return FileResponse(path="static/webapp/index.html")
 
 
+@app.get("/{route}", description="Send root client")
+async def send_route_client():
+    return FileResponse(path="static/client/index.html")
+
+
 @app.on_event("shutdown")
 async def on_shutdown():
     await bot.session.close()
