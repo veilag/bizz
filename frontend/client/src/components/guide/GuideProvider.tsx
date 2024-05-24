@@ -35,7 +35,7 @@ const GuideProvider = () => {
   }, [guideState])
 
   if (isShowed) return (
-    <div className="absolute h-full w-full overflow-hidden">
+    <div className="absolute top-0 h-full w-full overflow-hidden">
       <div className="absolute h-full w-full bg-neutral-700 opacity-85 z-[100]"></div>
       <div className="h-full z-[200] relative">
         {components[guideState]}

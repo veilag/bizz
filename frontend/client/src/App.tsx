@@ -25,7 +25,7 @@ const App = () => {
 
   return (
     <Provider store={atomStore}>
-      <ThemeProvider defaultTheme="system" storageKey="theme">
+      <ThemeProvider defaultTheme="dark" storageKey="theme">
         <CustomView
           className="w-full h-full"
           condition={isTablet || isDesktop}

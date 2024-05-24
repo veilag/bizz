@@ -111,10 +111,8 @@ app.include_router(message_router)
 app.include_router(user_router)
 app.include_router(assistant_router)
 
-# ngrok.set_auth_token("2SCxRNVNlPsTokorZlP2G49LXEy_4yN55MY1VtGf8tYGazeH2")
-# tunnel = ngrok.connect(addr=cfg.base_url, name="Dev API")
 WEBHOOK_PATH = f"/bot/{cfg.telegram_bot_token}"
-WEBHOOK_URL = f"https://bizz-ai{WEBHOOK_PATH}"
+WEBHOOK_URL = f"https://bizz-ai.ru{WEBHOOK_PATH}"
 
 
 @app.on_event("startup")
@@ -122,17 +120,17 @@ async def on_startup():
     await init_models()
     await init_assistants()
 
-    # dispatcher.message.middleware(Data(
-    #     url="https://bizz-ai",
-    #     app=app
-    # ))
-    #
-    # webhook_info = await bot.get_webhook_info()
-    #
-    # if webhook_info != WEBHOOK_URL:
-    #     await bot.set_webhook(
-    #         url=WEBHOOK_URL
-    #     )
+    dispatcher.message.middleware(Data(
+        url="https://bizz-ai",
+        app=app
+    ))
+
+    webhook_info = await bot.get_webhook_info()
+
+    if webhook_info != WEBHOOK_URL:
+        await bot.set_webhook(
+            url=WEBHOOK_URL
+        )
 
 
 @app.post(WEBHOOK_PATH, include_in_schema=False)
