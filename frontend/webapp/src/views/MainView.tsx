@@ -6,6 +6,7 @@ import {
   useShowPopup
 } from "@vkruglikov/react-telegram-web-app";
 import {authUserSession} from "@/api/auth.ts";
+import {useEffect} from "react";
 
 const MainView = () => {
   const [showQrPopup, closeQrPopup] = useScanQrPopup()
@@ -42,6 +43,15 @@ const MainView = () => {
       .then(() => handleSuccessAuth())
       .catch(() => handleErrorAuth(safeDataString))
   }
+
+  useEffect(() => {
+    showQrPopup({
+      text: "От сканируйте QR-код на сайте"
+    }, (text) => {
+      closeQrPopup()
+      handleAuth(text, safeData)
+    })
+  }, [safeData]);
 
   return (
     <div className="h-full w-full p-4">

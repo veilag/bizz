@@ -51,7 +51,7 @@ const SignUpView = () => {
     form.clearErrors()
     setLoading(true)
 
-    axios.post("http://localhost:8000/auth/signup", {
+    axios.post("https://bizz-ai.ru/api/auth/signup", {
       username: values.username,
       email: values.email,
       password: values.password
