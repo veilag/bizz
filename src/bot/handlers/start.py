@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from src.bot.service import get_user
 from src.database.deps import get_session
 from src.routers.message.service import save_message
-from src.service.queue import AssistantManager
+from src.service.assistant import AssistantManager
 from src.service.socket import WebSocketManager
 from asyncio import get_event_loop
 
@@ -80,7 +80,6 @@ async def handle_user_message(message: Message, app: FastAPI, external_url: str)
         }
 
         await socket_manager.send_to_user(
-            session=session,
             user_id=user.id,
             event="USER_MESSAGE",
             payload={

@@ -21,7 +21,7 @@ const LinkView = ({ onSuccessLink }: LinkViewProps) => {
   const webApp = useWebApp()
 
   const handleAccountLinking = async (connectionID: string, safeDataString: string | undefined) => {
-    axios.post("../auth/telegram", {
+    axios.post("../api/auth/telegram", {
       connectionId: connectionID,
       telegramAuth: safeDataString,
     })

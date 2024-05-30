@@ -7,7 +7,7 @@ class GenerationRequest(BaseModel):
 
 
 class SelectionQueryRequest(BaseModel):
-    queryID: int
+    queryID: int | None
 
 
 class SelectionAssistantRequest(BaseModel):

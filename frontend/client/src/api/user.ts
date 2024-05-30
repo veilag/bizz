@@ -11,7 +11,7 @@ const updateUserSelectedAssistant = (assistantID: number) => {
   })
 }
 
-const updateUserSelectedQuery = (queryID: number) => {
+const updateUserSelectedQuery = (queryID: number | null) => {
   api.post("/business/selection/update/query", {
     "queryID": queryID
   })

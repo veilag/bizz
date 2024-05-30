@@ -1,8 +1,8 @@
 import {ResizableHandle, ResizablePanel, ResizablePanelGroup} from "@/components/ui/resizable.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {AlignLeft, ArrowRight, Chrome, Edit3, Loader, Plus} from "react-feather";
-import {useEffect, useState} from "react";
+import {AlignLeft, ArrowRight, Chrome, Edit3, Loader, Plus, Search} from "react-feather";
+import {ChangeEvent, useEffect, useState} from "react";
 import {addAssistantToUser, fetchAssistants, removeAssistantFromUser} from "@/api/assistant.ts";
 import {useAtom, useAtomValue} from "jotai";
 import {
@@ -16,7 +16,7 @@ import {Input} from "@/components/ui/input.tsx";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import Markdown from "react-markdown";
-import {Check} from "lucide-react";
+import {Check, X} from "lucide-react";
 import {userAtom} from "@/atoms/user.ts";
 import {useNavigate} from "react-router-dom";
 import atomStore from "@/atoms";
@@ -34,7 +34,28 @@ const AssistantsView = () => {
   const [userAssistants, setUserAssistants] = useAtom(userAssistantsAtom)
   const [selectedAssistant, setSelectedAssistant] = useAtom(selectedAssistantAtom)
   const [selectedUserAssistant, setSelectedUserAssistant] = useAtom(selectedUserAssistantAtom)
+
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [filteredAssistantList, setFilteredAssistantList] = useState<Assistant[]>([])
+
   const navigate = useNavigate()
+
+  const filterAssistantList = () => {
+    if (searchQuery === "") {
+      setFilteredAssistantList(assistants)
+      return
+    }
+
+    setFilteredAssistantList(assistants.filter(assistant => {
+      if (assistant.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return assistant
+      }
+    }))
+  }
+
+  const handleSearchInput = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value)
+  }
 
   const handleUserAssistantAdding = (assistant: Assistant) => {
     addAssistantToUser(assistant.id)
@@ -63,6 +84,10 @@ const AssistantsView = () => {
   }
 
   useEffect(() => {
+    filterAssistantList()
+  }, [searchQuery, assistants]);
+
+  useEffect(() => {
     if (assistants.length === 0) {
       setLoading(true)
     }
@@ -85,25 +110,55 @@ const AssistantsView = () => {
       <ResizablePanel defaultSize={30}>
         <header className="h-14 text-lg flex justify-between items-center px-4">
           <h2 className="font-semibold">Ассистенты</h2>
-            <Button disabled={!user?.isDeveloper} variant="ghost" onClick={() => navigate('/editor', {
+          <AnimateIn
+            from="opacity-0 -translate-y-4"
+            duration={300}
+            to="opacity-100 translate-y-0 translate-x-0"
+            delay={25}
+          >
+            <Button
+              disabled={!user?.isDeveloper}
+              size="icon"
+              variant="ghost"
+              onClick={() => navigate('/editor', {
               state: {
                 edit: false
               }
             })}>
-              Создать
-              <Plus className="ml-2" size={16}/>
+              <Plus size={18}/>
             </Button>
+          </AnimateIn>
         </header>
         <Separator/>
         <div className="flex flex-col h-full">
           <div className="flex gap-2 p-4">
-            <Input className="flex-1" placeholder="Найти"/>
+            <Input
+              value={searchQuery}
+              onChange={handleSearchInput}
+              className="flex-1"
+              placeholder="Найти"/>
+
+            {searchQuery !== "" && (
+              <AnimateIn
+                from="opacity-0 translate-x-4"
+                to="opacity-100 translate-y-0 translate-x-0"
+                duration={200}
+              >
+                <Button
+                  onClick={() => setSearchQuery("")}
+                  size="icon"
+                  variant="outline"
+                >
+                  <X size={14} />
+                </Button>
+              </AnimateIn>
+            )}
           </div>
 
           <ScrollArea className="px-4 h-[calc(100%-128px)]">
-            {!isLoading && (
+            {!isLoading && filteredAssistantList.length !== 0 && (
               <ul className="flex flex-col-reverse gap-2 mb-4">
-                {assistants.map((assistant, index) => (
+                {filteredAssistantList.map((assistant, index) => (
                   <AnimateIn
                     from="opacity-0 scale-90 -translate-y-4"
                     to="opacity-100 scale-100 translate-y-0 translate-x-0"
@@ -143,6 +198,14 @@ const AssistantsView = () => {
               <Loader size={20} className="animate-spin"/>
             </div>
           )}
+
+          {!isLoading && filteredAssistantList.length === 0 && searchQuery !== "" && (
+            <div className="w-full flex items-center flex-col pt-5 text-center">
+              <Search size={30}/>
+              <h2 className="text-lg font-semibold mt-2">Ничего не найдено</h2>
+              <p className="text-muted-foreground text-sm">Ассистента по запросу не существует</p>
+            </div>
+          )}
         </ScrollArea>
       </div>
     </ResizablePanel>
@@ -154,46 +217,81 @@ const AssistantsView = () => {
       <header className="h-14 px-4 flex items-center justify-between">
         {selectedAssistant && (
           <>
-            <div className="flex gap-2 items-center">
-              <Chrome size={18}/>
-              <ArrowRight size={18}/>
-              <span className="text-lg font-medium">
+            <AnimateIn
+              from="opacity-0 -translate-y-4"
+              duration={300}
+              to="opacity-100 translate-y-0 translate-x-0"
+              delay={50}
+            >
+              <div className="flex gap-2 items-center">
+                <Chrome size={18}/>
+                <ArrowRight size={18}/>
+                <span className="text-lg font-medium">
                   {selectedAssistant?.name}
                 </span>
+              </div>
+            </AnimateIn>
+
+            <div className="flex items-center gap-2">
+              {user?.id === selectedAssistant.createdBy && (
+                <AnimateIn
+                  from="opacity-0 -translate-y-4"
+                  duration={300}
+                  to="opacity-100 translate-y-0 translate-x-0"
+                  delay={100}
+                >
+                  <Button onClick={() => navigate('/editor', {
+                    state: {
+                        edit: true
+                      }
+                    })} variant="ghost">
+                      <Edit3 className="mr-2" size={18} />
+                      Редактировать
+                    </Button>
+                </AnimateIn>
+              )}
+
+              {userAssistants.some(assistant => assistant.id == selectedAssistant.id) && (
+                <AnimateIn
+                  from="opacity-0 -translate-y-4"
+                  duration={300}
+                  to="opacity-100 translate-y-0 translate-x-0"
+                  delay={150}
+                >
+                  <Button onClick={() => handleUserAssistantDelete(selectedAssistant)} variant="outline">
+                    <Check className="mr-2" size={18} /> Добавлено
+                  </Button>
+                </AnimateIn>
+              )}
+
+              {!userAssistants.some(assistant => assistant.id == selectedAssistant.id) && (
+                <AnimateIn
+                  from="opacity-0 -translate-y-4"
+                  duration={300}
+                  to="opacity-100 translate-y-0 translate-x-0"
+                  delay={200}
+                >
+                  <Button onClick={() => handleUserAssistantAdding(selectedAssistant)}>
+                    <Plus className="mr-2" size={18}/>
+                    <span>Добавить</span>
+                  </Button>
+                </AnimateIn>
+              )}
             </div>
+          </>
+        )}
 
-                <div className="flex items-center gap-2">
-                  {user?.id === selectedAssistant.createdBy && (
-                    <div className="flex items-center gap-1">
-                        <Button onClick={() => navigate('/editor', {
-                          state: {
-                            edit: true
-                          }
-                        })} variant="ghost">
-                          <Edit3 className="mr-2" size={18} />
-                          Редактировать
-                        </Button>
-                    </div>
-                  )}
+        {!selectedAssistant && (
+          <AnimateIn
+            from="opacity-0 -translate-y-4"
+            duration={300}
+            to="opacity-100 translate-y-0 translate-x-0"
+            delay={50}
+          >
+            <h2 className="font-medium">Выберите ассистента</h2>
+          </AnimateIn>
+        )}
 
-                  {userAssistants.some(assistant => assistant.id == selectedAssistant.id) && (
-                    <Button onClick={() => handleUserAssistantDelete(selectedAssistant)} variant="outline">
-                      <Check className="mr-2" size={18} /> Добавлено
-                    </Button>
-                  )}
-
-                  {!userAssistants.some(assistant => assistant.id == selectedAssistant.id) && (
-                    <Button onClick={() => handleUserAssistantAdding(selectedAssistant)}>
-                      <Plus className="mr-2" size={18}/>
-                      <span>Добавить</span>
-                    </Button>
-                  )}
-                </div>
-              </>
-            )}
-            {!selectedAssistant && (
-              <h2 className="font-medium">Выберите ассистента</h2>
-            )}
           </header>
           <Separator/>
           <div className="px-4 py-2 items-center flex gap-2">

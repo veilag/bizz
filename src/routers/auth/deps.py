@@ -93,8 +93,7 @@ async def check_user(
     return user
 
 
-async def get_user_from_refresh_token(
-        session: AsyncSession,
+def get_user_from_refresh_token(
         refresh_token: str
 ):
     try:
@@ -109,7 +108,7 @@ async def get_user_from_refresh_token(
         if datetime.fromtimestamp(token_data.exp) < datetime.now():
             return None
 
-        print(token_data)
+        return token_data
 
     except (JWTError, ValidationError):
         return None

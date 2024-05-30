@@ -35,17 +35,17 @@ const MainPanelNavigation = () => {
         <Separator/>
 
         <li>
-          <NavLink to="/help" className={({isActive, isPending}) =>
-            isPending ? "" : isActive ?
-              "bg-accent text-accent-foreground justify-between py-2 px-4 h-10 w-full inline-flex items-center  whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" :
-              "group hover:bg-accent justify-between hover:text-accent-foreground py-2 px-4 h-10 w-full inline-flex items-center  whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          }>
+          <a
+            target="_blank"
+            className="group hover:bg-accent justify-between hover:text-accent-foreground py-2 px-4 h-10 w-full inline-flex items-center  whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            href="https://python-work.notion.site/BizzAI-6c663733ecc74b6a9fd7aa13f1509b02?pvs=4"
+          >
             <div className="flex items-center">
               <Info className="w-4 h-4 mr-2 group-hover:animate-icon-pong"/>
               <span>Помощь</span>
             </div>
             <ExternalLink className="w-4 h-4 text-muted-foreground"/>
-          </NavLink>
+          </a>
         </li>
       </ul>
     </nav>

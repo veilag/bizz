@@ -33,7 +33,6 @@ async def handle_business_generation(
     await session.commit()
 
     await socket_manager.send_to_user(
-        session=session,
         user_id=user.id,
         event="BUSINESS_CREATED",
         payload={

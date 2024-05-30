@@ -2,7 +2,7 @@ import axios from "axios";
 
 const checkAuthentication = async (unsafeData: string | undefined) => {
   try {
-    const res = await axios.post("../auth/telegram/me", {
+    const res = await axios.post("../api/auth/telegram/me", {
       telegramAuth: unsafeData
     })
 

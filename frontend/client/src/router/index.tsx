@@ -28,10 +28,6 @@ const router = createBrowserRouter([
       {
         path: '/editor',
         element: <AssistantEditorView/>
-      },
-      {
-        path: '/help',
-        element: <p>Help</p>
       }
     ]
   },

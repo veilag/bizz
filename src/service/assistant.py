@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Any, Callable, Union
+from typing import Dict, Any
 
 from langchain.chat_models.gigachat import GigaChat
 from sqlalchemy import select
@@ -8,14 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import cfg
 from src.database.deps import get_session
 from src.models import Message, Assistant, BusinessAssistantData
-from langchain.schema import HumanMessage, SystemMessage
+import src.service.shared as shared
 
 from src.service.socket import WebSocketManager
 
 from jinja2 import Environment, BaseLoader
 from src.service.response import Response
 from src.service.registrator import Registrator
-from uuid import uuid4
 
 
 def render(html_string: str, context: Dict[str, Any]):
@@ -33,30 +32,23 @@ def generate(messages: list):
 
 
 async def get(session: AsyncSession, assistant_name: str, query_id: int):
-    result = await session.execute(
-        select(Assistant)
-        .where(Assistant.username == assistant_name)
-    )
+    assistant = (
+        await session.execute(
+            select(Assistant).where(Assistant.username == assistant_name)
+        )
+    ).scalars().one_or_none()
 
-    assistant: Assistant = result.scalars().one_or_none()
-
-    if not assistant:
+    if not assistant or not assistant.is_data_accessible:
         return None
 
-    if not assistant.is_data_accessible:
-        return None
+    data = (
+        await session.execute(
+            select(BusinessAssistantData)
+            .where(BusinessAssistantData.assistant_id == assistant.id, BusinessAssistantData.query_id == query_id)
+        )
+    ).scalars().one_or_none()
 
-    data_result = await session.execute(
-        select(BusinessAssistantData)
-        .where(BusinessAssistantData.assistant_id == assistant.id, BusinessAssistantData.query_id == query_id)
-    )
-
-    data = data_result.scalars().one_or_none()
-
-    if not data:
-        return None
-
-    return json.loads(data.string_data)
+    return json.loads(data.string_data) if data else None
 
 
 class AssistantManager:
@@ -120,7 +112,6 @@ class AssistantManager:
             assistant_business_data = assistant_business_data_query.scalars().one()
 
             await self.socket_manager.send_to_user(
-                session=session,
                 user_id=payload.get("user_id"),
                 event="NEW_MESSAGE",
                 payload={
@@ -169,7 +160,6 @@ class AssistantManager:
 
                 await session.commit()
                 await self.socket_manager.send_to_user(
-                    session=session,
                     user_id=payload.get("user_id"),
                     event="ASSISTANT_WIDGET_CLOSE",
                     payload={
@@ -241,7 +231,6 @@ class AssistantManager:
                 await session.commit()
 
                 await self.socket_manager.send_to_user(
-                    session=session,
                     user_id=payload.get("user_id"),
                     event="ASSISTANT_MESSAGE_UPDATE",
                     payload={
@@ -278,7 +267,6 @@ class AssistantManager:
                 await session.commit()
 
                 await self.socket_manager.send_to_user(
-                    session=session,
                     user_id=payload.get("user_id"),
                     event="ASSISTANT_MESSAGE_UPDATE",
                     payload={
@@ -305,7 +293,6 @@ class AssistantManager:
                 message_update_payload["logs"] = response.logs
 
             await self.socket_manager.send_to_user(
-                session=session,
                 user_id=payload.get("user_id"),
                 event="ASSISTANT_MESSAGE_UPDATE",
                 payload=message_update_payload
@@ -353,7 +340,6 @@ class AssistantManager:
             template = ""
 
             await self.socket_manager.send_to_user(
-                session=session,
                 user_id=payload.get("user_id"),
                 event="ASSISTANT_MESSAGE_UPDATE",
                 payload={
@@ -402,7 +388,6 @@ class AssistantManager:
                 await session.commit()
 
                 await self.socket_manager.send_to_user(
-                    session=session,
                     user_id=payload.get("user_id"),
                     event="ASSISTANT_MESSAGE_UPDATE",
                     payload={
@@ -440,7 +425,6 @@ class AssistantManager:
                 await session.commit()
 
                 await self.socket_manager.send_to_user(
-                    session=session,
                     user_id=payload.get("user_id"),
                     event="ASSISTANT_MESSAGE_UPDATE",
                     payload={
@@ -472,7 +456,6 @@ class AssistantManager:
                 message_update_payload["logs"] = response.logs
 
             await self.socket_manager.send_to_user(
-                session=session,
                 user_id=payload.get("user_id"),
                 event="ASSISTANT_MESSAGE_UPDATE",
                 payload=message_update_payload

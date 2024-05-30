@@ -10,7 +10,7 @@ from src.bot.middleware import Data
 from src.database import init_models
 from src.database.deps import get_session
 from src.models import Assistant, User, UserAssistant
-from src.service.queue import AssistantManager
+from src.service.assistant import AssistantManager
 from src.bot import bot, dispatcher
 from pyngrok import ngrok
 from src.config import cfg
@@ -91,6 +91,8 @@ async def init_assistants():
 
 origins = [
     "https://bizz-ai",
+    "http://127.0.0.1:8000",
+    "http://localhost:5173"
 ]
 
 app.add_middleware(
@@ -121,7 +123,7 @@ async def on_startup():
     await init_assistants()
 
     dispatcher.message.middleware(Data(
-        url="https://bizz-ai",
+        url="https://bizz-ai.ru",
         app=app
     ))
 

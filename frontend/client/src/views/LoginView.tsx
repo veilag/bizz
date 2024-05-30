@@ -18,6 +18,7 @@ import LoginForm from "@/components/forms/auth/LoginForm.tsx";
 import {loginSchema} from "@/components/forms/auth/schema.ts";
 import {useSetAtom} from "jotai";
 import {guideStateAtom} from "@/atoms/guide.ts";
+import AnimateIn from "@/components/ui/animate.ts";
 
 const LoginView = () => {
   const setGuideState = useSetAtom(guideStateAtom)
@@ -137,6 +138,7 @@ const LoginView = () => {
       case "ACCESS_TOKEN_ACCEPT":
         setLoading(true)
         setCodeShowed(false)
+
         toast.success("Выполнен вход через Telegram")
 
         localStorage.setItem("accessToken", (message.payload as TokenPayload).data.accessToken)
@@ -152,6 +154,8 @@ const LoginView = () => {
         setTimeout(() => {
           navigate("/list")
         }, 1000)
+
+        setGuideState("start")
 
         break
     }
@@ -184,21 +188,34 @@ const LoginView = () => {
             onSubmit={(data) => onSubmit(data)}
             isLoading={isLoading}
             isCodeShowed={isCodeShowed}/>
-
-          <Button
-            disabled={isLoading}
-            onClick={() => handleLoginViaTelegram()}
-            className="w-full mt-2 bg-blue-500 text-white hover:bg-blue-600"
+          <AnimateIn
+            from="opacity-0 -translate-y-4"
+            to="opacity-100 translate-y-0 translate-x-0"
+            duration={300}
+            delay={200}
           >
-            <TelegramLogo className="mr-2"/> Войти через Telegram
-          </Button>
-          <Button
-            onClick={() => navigate("/signup")}
-            variant="link"
-            className="w-full mt-2"
+            <Button
+              disabled={isLoading}
+              onClick={() => handleLoginViaTelegram()}
+              className="w-full mt-2 bg-blue-500 text-white hover:bg-blue-600"
+            >
+              <TelegramLogo className="mr-2"/> Войти через Telegram
+            </Button>
+          </AnimateIn>
+          <AnimateIn
+            from="opacity-0 -translate-y-4"
+            to="opacity-100 translate-y-0 translate-x-0"
+            duration={300}
+            delay={200}
           >
-            Зарегистрироваться
-          </Button>
+            <Button
+              onClick={() => navigate("/signup")}
+              variant="link"
+              className="w-full mt-2"
+            >
+              Зарегистрироваться
+            </Button>
+          </AnimateIn>
         </div>
       </div>
 
@@ -207,7 +224,9 @@ const LoginView = () => {
                   <div className="overflow-hidden w-80">
                       <div className="mb-4">
                           <h2 className="font-bold text-lg">Отсканируйте QR-код</h2>
-                          <p className="text-muted-foreground text-sm">Откройте @bizz_bot в Telegram для сканирования
+                          <p className="text-muted-foreground text-sm">Откройте <a target="_blank" className="underline"
+                                                                                   href="https://t.me/b1zz_bot">@b1zz_bot</a> в
+                              Telegram для сканирования
                               кода для
                               сканирования кода
                           </p>

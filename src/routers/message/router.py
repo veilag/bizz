@@ -6,7 +6,7 @@ from src.models import User
 from src.routers.auth.deps import current_user
 from src.routers.message.schemas import MessageRequest, CallbackRequest
 from src.routers.message import service
-from src.service.queue import AssistantManager
+from src.service.assistant import AssistantManager
 from src.service.socket import WebSocketManager
 
 router = APIRouter(
@@ -47,7 +47,6 @@ async def handle_message(
     }
 
     await socket_manager.send_to_user(
-        session=session,
         user_id=user.id,
         event="USER_MESSAGE",
         payload={
@@ -65,9 +64,7 @@ async def handle_message(
     )
 
     await assistant_manager.process_assistant(task_payload)
-    return {
-        "message": "Сообщение пользователя сохранено"
-    }
+    return {"message": "Сообщение пользователя сохранено"}
 
 
 @router.post("/callback")
@@ -90,16 +87,14 @@ async def handle_message_callback(
         }
     })
 
-    return {
-        "message": "Callback handled"
-    }
+    return {"message": "Callback обработан"}
 
 
 @router.get("/get/{query_id}")
 async def get_message_group_messages(
         query_id: int,
         session: AsyncSession = Depends(get_session),
-        user: User = Depends(current_user)
+        _: User = Depends(current_user)
 ):
     db_message_list = await service.get_query_messages(
         session=session,
@@ -130,23 +125,13 @@ async def clear_query_messages(
         query_id: int,
         assistant_id: int,
         session: AsyncSession = Depends(get_session),
-        user: User = Depends(current_user)
+        _: User = Depends(current_user)
 ):
-    try:
-        await service.clear_query_messages(
-            session=session,
-            assistant_id=assistant_id,
-            query_id=query_id
-        )
+    await service.clear_query_messages(
+        session=session,
+        assistant_id=assistant_id,
+        query_id=query_id
+    )
 
-        await session.commit()
-
-        return {
-            "message": "Сообщения удалены"
-        }
-
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="При удалении сообщений произошла ошибка"
-        )
+    await session.commit()
+    return {"message": "Сообщения удалены"}

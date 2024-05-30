@@ -1,6 +1,5 @@
 import api from "@/api/index.ts";
-import {Message, messageListAtom} from "@/atoms/message.ts";
-import atomStore from "@/atoms";
+import {Message} from "@/atoms/message.ts";
 
 interface SendMessageRequest {
   content: string
@@ -27,10 +26,7 @@ const sendMessageCallback = (queryID: number, messageID: number, assistantID: nu
 }
 
 const fetchMessage = (messageGroupID: number | undefined) => {
-  api.get<Message[]>(`/message/get/${messageGroupID}`)
-    .then(res => {
-      atomStore.set(messageListAtom, res.data)
-    })
+  return api.get<Message[]>(`/message/get/${messageGroupID}`)
 }
 
 const clearQueryMessages = (queryID: number, assistantID: number) => {

@@ -20,9 +20,16 @@ api.interceptors.response.use((response) => {
 
   if (error.response.status === 403 && !originalRequest._retry) {
     originalRequest._retry = true;
-    console.log("refresh required")
+
+    const refreshToken = localStorage.getItem("refreshToken");
+    const newAccessToken = await api.post<string>('/refresh', { token: refreshToken });
+
+    localStorage.setItem('accessToken', newAccessToken.data);
+    originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
     return api(originalRequest);
   }
+
   return Promise.reject(error);
 });
 

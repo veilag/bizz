@@ -23,6 +23,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {X} from "lucide-react";
 import {selectedUserAssistantAtom, userAssistantsAtom} from "@/atoms/assistant.ts";
 import {sendMessage} from "@/api/message.ts";
+import AnimateIn from "@/components/ui/animate.ts";
 
 interface BusinessListPanelProps {
   setCollapse: Dispatch<SetStateAction<boolean>>
@@ -134,13 +135,19 @@ const BusinessListPanel = forwardRef<ImperativePanelHandle, BusinessListPanelPro
             placeholder="Найти"
           />
           {searchQuery !== "" && (
-            <Button
-              onClick={() => setSearchQuery("")}
-              size="icon"
-              variant="outline"
+            <AnimateIn
+              from="opacity-0 translate-x-4"
+              to="opacity-100 translate-y-0 translate-x-0"
+              duration={200}
             >
-              <X size={14} />
-            </Button>
+              <Button
+                onClick={() => setSearchQuery("")}
+                size="icon"
+                variant="outline"
+              >
+                <X size={14} />
+              </Button>
+            </AnimateIn>
           )}
         </div>
 

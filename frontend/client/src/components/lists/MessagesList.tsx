@@ -12,7 +12,7 @@ import {selectedUserAssistantAtom, userAssistantsAtom} from "@/atoms/assistant.t
 import {toast} from "sonner";
 import parse, {DOMNode, domToReact, Element} from 'html-react-parser';
 import {X} from "lucide-react";
-import {sendMessage, sendMessageCallback} from "@/api/message.ts";
+import {fetchMessage, sendMessage, sendMessageCallback} from "@/api/message.ts";
 import {ConnectionMessage} from "@/types/socket.ts";
 import {AssistantMessageUpdatePayload, MessagePayload} from "@/types/payloads.ts";
 import {useTheme} from "@/components/theme.tsx";
@@ -30,7 +30,6 @@ const toCamelCase = (str: string): string => {
 
 const MessagesList = () => {
   const theme = useTheme()
-
   const {lastJsonMessage} = useWebSocket<ConnectionMessage>(
     WS_URL, {
       share: true
@@ -44,13 +43,14 @@ const MessagesList = () => {
   const userAssistants = useAtomValue(userAssistantsAtom)
   const [selectedUserAssistant, setSelectedUserAssistant] = useAtom(selectedUserAssistantAtom)
   const selectedQuery = useAtomValue(selectedQueryAtom)
+
+  const [isMessagesFetching, setMessagesFetching] = useState<boolean>(true)
   const [assistantMessages, setAssistantMessages] = useState<Message[]>([])
 
   const scrollToLastMessage = () => {
     if (!scrollTargetRef.current) return
 
     scrollTargetRef.current.scrollIntoView({
-      behavior: "smooth",
       block: "center"
     })
   }
@@ -160,6 +160,21 @@ const MessagesList = () => {
   useEffect(() => {
     scrollToLastMessage()
   }, [assistantMessages]);
+
+  useEffect(() => {
+    if (!selectedQuery) return
+    setAssistantMessages([])
+    setMessages([])
+
+    setMessagesFetching(true)
+    fetchMessage(selectedQuery.id)
+      .then(res => {
+        setAssistantMessages(res.data)
+        setMessages(res.data)
+
+        setMessagesFetching(false)
+      })
+  }, [selectedQuery]);
 
   return (
     <ScrollArea className="h-[calc(100vh-11rem)] break-words chat-panel-scroll">
@@ -342,7 +357,7 @@ const MessagesList = () => {
             </AnimateIn>
           )
         })}
-        {assistantMessages.length === 0 && selectedUserAssistant && (
+        {!isMessagesFetching && assistantMessages.length === 0 && selectedUserAssistant && (
           <div className="mt-10 w-full flex-col flex items-center justify-center">
             <MessageCircle size={30} />
             <p className="font-medium mt-2">Чат с ассистентом пуст</p>

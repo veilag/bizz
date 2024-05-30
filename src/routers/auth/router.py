@@ -4,10 +4,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.deps import get_session
-from src.models import UserAssistant
+from src.routers.auth import service
 from src.routers.auth.deps import get_user_from_refresh_token
 from src.routers.auth.schemas import TokenSchema, UserOut, UserAuth, TelegramAuth, TelegramUnsafeAuth, RefreshSchema
-from src.routers.auth.service import get_user, add_user, update_user_telegram, get_user_by_telegram_id
+from src.routers.auth.service import get_user_by_name, add_user, update_user_telegram, get_user_by_telegram_id
 from src.service.socket import WebSocketManager
 from src.utils import verify_password, create_access_token, create_refresh_token
 from src.bot import bot
@@ -23,7 +23,7 @@ async def handle_user_signup(
         data: UserAuth,
         session: AsyncSession = Depends(get_session)):
 
-    user = await get_user(session, data.username)
+    user = await get_user_by_name(session, data.username)
 
     if user is not None:
         raise HTTPException(
@@ -39,18 +39,8 @@ async def handle_user_signup(
     )
 
     await session.commit()
+    await service.add_system_assistants_to_user(session, new_user.id)
 
-    session.add(UserAssistant(
-        user_id=new_user.id,
-        assistant_id=1
-    ))
-
-    session.add(UserAssistant(
-        user_id=new_user.id,
-        assistant_id=2
-    ))
-
-    await session.commit()
     return new_user
 
 
@@ -59,7 +49,7 @@ async def handle_user_login(
         form_data: OAuth2PasswordRequestForm = Depends(),
         session: AsyncSession = Depends(get_session)):
 
-    user = await get_user(session, form_data.username)
+    user = await get_user_by_name(session, form_data.username)
 
     if user is None:
         raise HTTPException(
@@ -87,14 +77,13 @@ async def handle_user_login(
 @router.post("/refresh")
 async def refresh_access_token(
         data: RefreshSchema,
-        session: AsyncSession = Depends(get_session)
 ):
-    await get_user_from_refresh_token(
-        session=session,
+    token_data = get_user_from_refresh_token(
         refresh_token=data.refreshToken
     )
 
-    return {"message": "OMG"}
+    user_id = token_data.get("payload").get("user_id")
+    return user_id
 
 
 @router.post("/login/telegram", summary="Login user via linked Telegram account")
@@ -109,7 +98,7 @@ async def handle_user_login_via_telegram(
     if not connection_is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Connection session is invalid"
+            detail="Идентификатор соединения невалидно"
         )
 
     try:
@@ -121,7 +110,7 @@ async def handle_user_login_via_telegram(
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not parse telegram credentials"
+            detail="Данные Telegram невалидны"
         )
 
     user = await get_user_by_telegram_id(
@@ -132,7 +121,7 @@ async def handle_user_login_via_telegram(
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Telegram account is not linked to service"
+            detail="Telegram аккаунт не привязан к сервису"
         )
 
     socket_manager.authorize_connection(
@@ -158,7 +147,7 @@ async def handle_user_login_via_telegram(
     )
 
     return {
-        "message": "Client session authorized"
+        "message": "Клиент авторизован"
     }
 
 
@@ -177,7 +166,7 @@ async def handle_telegram_integration(
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not parse telegram credentials"
+            detail="Данные Telegram невалидны"
         )
 
     socket_manager: WebSocketManager = request.app.socket_manager
@@ -186,7 +175,7 @@ async def handle_telegram_integration(
     if connection_user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid connection session"
+            detail="Идентификатор соединения невалидно"
         )
 
     await update_user_telegram(
@@ -203,7 +192,7 @@ async def handle_telegram_integration(
     )
 
     return {
-        "message": "Telegram account linked"
+        "message": "Telegram аккаунт успешно привязан"
     }
 
 
@@ -221,7 +210,7 @@ async def handle_telegram_credential_send(
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not parse telegram credentials"
+            detail="Данные Telegram невалидны"
         )
 
     user = await get_user_by_telegram_id(
@@ -232,7 +221,7 @@ async def handle_telegram_credential_send(
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Telegram account is not linked to service"
+            detail="Telegram аккаунт не привязан к сервису"
         )
 
     return user
