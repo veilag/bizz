@@ -2,6 +2,7 @@ import json
 from typing import Dict, Any
 
 from langchain.chat_models.gigachat import GigaChat
+from openai import OpenAI
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,12 +24,27 @@ def render(html_string: str, context: Dict[str, Any]):
     return render_string
 
 
-def generate(messages: list):
-    chat = GigaChat(
-        credentials=cfg.ai_key,
-        verify_ssl_certs=False,
-    )
-    return chat(messages).content
+def generate(ai_type: str, messages: list):
+    if ai_type == "gigachat":
+        chat = GigaChat(
+            credentials=cfg.ai_key,
+            verify_ssl_certs=False,
+        )
+
+        return chat(messages).content
+
+    if ai_type == "gpt":
+        client = OpenAI(
+            api_key=cfg.gpt_ai_key,
+            base_url="https://api.proxyapi.ru/openai/v1"
+        )
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages
+        )
+
+        return chat_completion.choices[0].message.content
 
 
 async def get(session: AsyncSession, assistant_name: str, query_id: int):
