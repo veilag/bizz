@@ -33,19 +33,17 @@ const TelegramLinkingDialog = ({open, onLink, onClose }: TelegramLinkingAlertPro
     const accessToken = localStorage.getItem("accessToken")
     setLoading(true)
 
-    setTimeout(() => {
-      sendJsonMessage({
-        event: "SUBSCRIBE_USER",
-        payload: {
-          data: accessToken
-        }
-      })
+    sendJsonMessage({
+      event: "SUBSCRIBE_USER",
+      payload: {
+        data: accessToken
+      }
+    })
 
-      sendJsonMessage({
-        "event": "LINK_TELEGRAM_ACCOUNT",
-        "payload": null
-      })
-    }, 1000)
+    sendJsonMessage({
+      "event": "LINK_TELEGRAM_ACCOUNT",
+      "payload": null
+    })
   }, [open, sendJsonMessage]);
 
   useEffect(() => {

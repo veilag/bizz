@@ -28,7 +28,6 @@ const NewAssistantForm = ({onSubmit, isLoading, initialAssistant}: NewAssistantF
   })
 
   const handleSubmit = (data: z.infer<typeof assistantSchema>) => {
-    form.reset()
     onSubmit(data)
   }
 

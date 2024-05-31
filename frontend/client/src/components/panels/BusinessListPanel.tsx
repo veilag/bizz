@@ -111,6 +111,7 @@ const BusinessListPanel = forwardRef<ImperativePanelHandle, BusinessListPanelPro
 
   return (
     <ResizablePanel
+      className="sm:hidden md:block max-[639px]:hidden"
       onCollapse={() => {
         setCollapse(true)
       }}

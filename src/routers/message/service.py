@@ -5,13 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models import Message, Assistant
 
 
-def save_message(session: AsyncSession, content: str, query_id: int, user_id: int, assistant_id: int) -> Message:
+def save_message(session: AsyncSession, content: str, query_id: int, user_id: int, assistant_id: int, from_telegram=False) -> Message:
     new_message = Message(
         content=content,
         query_id=query_id,
 
         assistant_id=assistant_id,
         user_id=user_id,
+        from_telegram=from_telegram
     )
 
     session.add(new_message)

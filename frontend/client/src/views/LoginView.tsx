@@ -178,8 +178,16 @@ const LoginView = () => {
         <div className="w-96 h-96 origin-right opacity-50 bg-red-500 animate-rotate-out blur-[100px]"></div>
         <div className="w-96 h-96 origin-left opacity-50 bg-purple-500 animate-rotate-in delay-1000 blur-[100px]"></div>
       </div>
-      <div className="absolute w-full h-full flex justify-center items-start z-5">
-        <Logo className="w-20 h-20 mt-10 duration-200 hover:cursor-pointer hover:scale-125 transition-all ease-out"/>
+      <div
+        onClick={() => toast.message("👋 Привет!", {
+          position: "top-center",
+          description: "Уже зарегистрирован? Скорее создавать новые бизнес-планы!"
+        })}
+        className="absolute w-full top-0 flex justify-center items-start z-5"
+      >
+        <Logo
+          className="w-20 h-20 mt-10 duration-200 hover:cursor-pointer hover:scale-125 transition-all ease-out"
+        />
       </div>
 
       <div className="p-6 z-10">

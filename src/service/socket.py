@@ -3,6 +3,7 @@ from typing import TypedDict, Dict, Any
 from fastapi import WebSocket
 from pydantic import BaseModel
 
+from src.config import cfg
 from src.database.deps import get_session
 from src.models import User
 from src.routers.auth.deps import check_user

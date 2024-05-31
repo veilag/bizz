@@ -34,12 +34,18 @@ const ConnectionStatus = ({isConnectionLost, isError}: ConnectionStatusProps) =>
         )
       ))}
 
-      {isError && (
-        <div className="flex items-center dark:bg-white dark:text-black text-white justify-center
+      {connectionLostTransition((style, ) => (
+        isError && (
+          <animated.div
+            style={style}
+            className="absolute top-0 z-40 w-full">
+          <div className="flex items-center dark:bg-white dark:text-black text-white justify-center
                         gap-2 py-1 bg-black w-full">
-          <span className="text-sm">Сервер не отвечает</span>
-        </div>
-      )}
+            <span className="text-sm">Сервер не отвечает</span>
+          </div>
+          </animated.div>
+        )
+      ))}
     </>
   )
 }

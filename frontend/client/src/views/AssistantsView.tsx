@@ -107,7 +107,10 @@ const AssistantsView = () => {
       direction="horizontal"
       className="w-full h-full"
     >
-      <ResizablePanel defaultSize={30}>
+      <ResizablePanel
+        className="sm:hidden md:block max-[639px]:hidden"
+        defaultSize={30}
+      >
         <header className="h-14 text-lg flex justify-between items-center px-4">
           <h2 className="font-semibold">Ассистенты</h2>
           <AnimateIn

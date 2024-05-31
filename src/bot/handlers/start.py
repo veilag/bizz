@@ -63,7 +63,8 @@ async def handle_user_message(message: Message, app: FastAPI, external_url: str)
             query_id=user.selected_query_id,
 
             assistant_id=user.selected_assistant_id,
-            user_id=user.id
+            user_id=user.id,
+            from_telegram=True
         )
 
         await session.commit()
@@ -72,6 +73,7 @@ async def handle_user_message(message: Message, app: FastAPI, external_url: str)
             "event": "ASSISTANT_MESSAGE_TRIGGER",
             "payload": {
                 "user_id": user.id,
+                "from_telegram": True,
                 "query_id": user.selected_query_id,
                 "assistant_id": user.selected_assistant_id,
                 "content": message.text,

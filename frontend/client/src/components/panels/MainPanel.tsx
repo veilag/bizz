@@ -18,7 +18,12 @@ const MainPanel = () => {
 
   return (
     <>
-      <ResizablePanel minSize={15} maxSize={25} defaultSize={20}>
+      <ResizablePanel
+        className="md:hidden sm:hidden max-[639px]:hidden lg:block"
+        minSize={15}
+        maxSize={25}
+        defaultSize={20}
+      >
         <div className="flex flex-col w-full h-full">
           <header className="w-full h-14 flex justify-center items-center px-2">
             <ProfileMenu setSharing={setSharing} setLinking={setLinking}>

@@ -14,6 +14,7 @@ import {useAtomValue} from "jotai";
 import {Loader} from "react-feather";
 import {toast} from "sonner";
 import {userAtom} from "@/atoms/user.ts";
+import {Button} from "@/components/ui/button.tsx";
 
 const AssistantEditorView = () => {
   const [isLoading, setLoading] = useState<boolean>(false)
@@ -82,7 +83,10 @@ const AssistantEditorView = () => {
       direction="horizontal"
       className="w-full h-full"
     >
-      <ResizablePanel defaultSize={30}>
+      <ResizablePanel
+        className="sm:hidden md:block max-[639px]:hidden z-[100] bg-white"
+        defaultSize={30}
+      >
         <header className="h-14 text-lg flex justify-between items-center px-4">
           <h2 className="font-semibold">Редактор ассистента</h2>
         </header>
@@ -95,8 +99,13 @@ const AssistantEditorView = () => {
       <ResizablePanel
         defaultSize={70}
       >
-        <header className="h-14 text-lg gap-4 flex items-center px-4">
+        <header className="h-14 text-lg gap-4 flex items-center justify-between px-4">
           <h2 className="font-semibold">Редактор кода</h2>
+          <Button
+            className="sm:block md:hidden max-[639px]:block"
+          >
+            Сохранить
+          </Button>
         </header>
         <Separator />
 
