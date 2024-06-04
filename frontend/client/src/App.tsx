@@ -27,7 +27,7 @@ const App = () => {
     <Provider store={atomStore}>
       <ThemeProvider defaultTheme="dark" storageKey="theme">
         <CustomView
-          className="w-full h-full"
+          className="w-screen h-svh"
           condition={isTablet || isDesktop}
         >
           <TooltipProvider>

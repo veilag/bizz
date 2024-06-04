@@ -24,6 +24,7 @@ import {X} from "lucide-react";
 import {selectedUserAssistantAtom, userAssistantsAtom} from "@/atoms/assistant.ts";
 import {sendMessage} from "@/api/message.ts";
 import AnimateIn from "@/components/ui/animate.ts";
+import {businessListShowedAtom} from "@/atoms/ui.ts";
 
 interface BusinessListPanelProps {
   setCollapse: Dispatch<SetStateAction<boolean>>
@@ -38,6 +39,7 @@ const BusinessListPanel = forwardRef<ImperativePanelHandle, BusinessListPanelPro
   const userAssistants = useAtomValue(userAssistantsAtom)
   const [queriesList, setQueriesList] = useAtom(queriesListAtom)
   const [filteredQueriesList, setFilteredQueriesList] = useState<BusinessQuery[]>([])
+  const listShowed = useAtomValue(businessListShowedAtom)
 
   const {lastJsonMessage: message} = useWebSocket<ConnectionMessage>(
     WS_URL,
@@ -111,7 +113,7 @@ const BusinessListPanel = forwardRef<ImperativePanelHandle, BusinessListPanelPro
 
   return (
     <ResizablePanel
-      className="sm:hidden md:block max-[639px]:hidden"
+      className={`${listShowed ? 'translate-x-0' : '-translate-x-full'} bg-white dark:bg-black z-10 transition-transform h-svh w-screen absolute md:static md:block`}
       onCollapse={() => {
         setCollapse(true)
       }}

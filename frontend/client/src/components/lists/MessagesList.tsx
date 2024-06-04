@@ -201,7 +201,7 @@ const MessagesList = () => {
                 <div className="text-sm">{user?.id === message.userID ? 'Вы' : userAssistants.find(assistant => assistant.id === message?.assistantID)?.name} {message.fromTelegram && 'через мессенджер'}</div>
                 <div className="text-xs">• <ReactTimeAgo date={new Date(message.createdAt)}/></div>
                 <div
-                  className="text-xs cursor-pointer group-hover:opacity-100 opacity-0 invisible group-hover:visible transition-all"
+                  className="hidden md:block text-xs cursor-pointer group-hover:opacity-100 opacity-0 invisible group-hover:visible transition-all"
                   onClick={() => {
                     navigator.clipboard.writeText(message.content)
                     toast.success("Текст сообщения скопирован")

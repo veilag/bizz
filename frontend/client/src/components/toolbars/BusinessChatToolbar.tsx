@@ -1,5 +1,5 @@
 import {Button} from "@/components/ui/button.tsx";
-import {ArrowLeft, Maximize2, Minimize2, MoreVertical, Trash} from "react-feather";
+import {ArrowLeft, Maximize2, Menu, Minimize2, MoreVertical, Trash} from "react-feather";
 import BusinessViewMenu from "@/components/dropdowns/BusinessViewMenu.tsx";
 import {useAtom, useSetAtom} from "jotai";
 import {queriesListAtom, selectedQueryAtom} from "@/atoms/queries.ts";
@@ -7,6 +7,7 @@ import {messageListAtom} from "@/atoms/message.ts";
 import {deleteQuery} from "@/api/queries.ts";
 import AnimateIn from "@/components/ui/animate.ts";
 import {updateUserSelectedQuery} from "@/api/user.ts";
+import {businessListShowedAtom} from "@/atoms/ui.ts";
 
 interface BusinessViewToolbarProps {
   isPanelCollapsed: boolean
@@ -18,6 +19,7 @@ const BusinessChatToolbar = ({ isPanelCollapsed, onPanelCollapse, onClose }: Bus
   const [selectedQuery, setSelectedQuery] = useAtom(selectedQueryAtom)
   const setQueriesList = useSetAtom(queriesListAtom)
   const setMessagesList = useSetAtom(messageListAtom)
+  const setListShowed = useSetAtom(businessListShowedAtom)
 
   const handleChatClose = () => {
     updateUserSelectedQuery(null)
@@ -38,19 +40,26 @@ const BusinessChatToolbar = ({ isPanelCollapsed, onPanelCollapse, onClose }: Bus
       })
   }
 
+  const showList = () => {
+    setListShowed(prev => !prev)
+  }
+
   return (
     <header className="h-14 flex justify-between items-center px-2">
       <div className="flex">
-            <AnimateIn
+        <Button onClick={showList} className="md:hidden" disabled={selectedQuery === undefined} size="icon" variant="ghost">
+          <Menu size={18} />
+        </Button>
+          <AnimateIn
               from="opacity-0 -translate-y-4"
               to="opacity-100 translate-y-0 translate-x-0"
               duration={300}
               delay={50}
             >
-            <Button disabled={selectedQuery === undefined} onClick={() => handleChatClose()} size="icon" variant="ghost">
+            <Button className="hidden md:flex" disabled={selectedQuery === undefined} onClick={() => handleChatClose()} size="icon" variant="ghost">
               <ArrowLeft size={18}/>
             </Button>
-            </AnimateIn>
+          </AnimateIn>
         <AnimateIn
           from="opacity-0 -translate-y-4"
           duration={300}

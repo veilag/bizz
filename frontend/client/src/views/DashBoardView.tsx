@@ -42,7 +42,7 @@ const DashBoardView = () => {
       direction="horizontal"
     >
       <MainPanel/>
-      <ResizableHandle withHandle/>
+      <ResizableHandle className="z-[30] md:flex hidden" withHandle/>
       <OutletPanel/>
     </ResizablePanelGroup>
   )

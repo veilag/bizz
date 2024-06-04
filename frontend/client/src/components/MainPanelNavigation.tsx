@@ -26,7 +26,7 @@ const MainPanelNavigation = () => {
           </AnimateIn>
         </li>
 
-        <li>
+        <li className="hidden md:block">
           <AnimateIn
             from="opacity-0 -translate-x-4"
             to="opacity-100 translate-y-0 translate-x-0"

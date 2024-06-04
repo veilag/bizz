@@ -48,7 +48,7 @@ const BusinessDashboardView = () => {
         ref={listPanelRef}
         setCollapse={setListPaneCollapsed}
       />
-      <ResizableHandle withHandle/>
+      <ResizableHandle className="z-[30] hidden md:flex" withHandle/>
       <BusinessChatPanel
         isPanelCollapsed={isListPanelCollapsed}
 
