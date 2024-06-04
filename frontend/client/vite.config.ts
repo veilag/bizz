@@ -5,7 +5,7 @@ import * as path from "node:path";
 export default defineConfig({
   plugins: [react()],
 
-  base: "/static/client/",
+  // base: "/static/client/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

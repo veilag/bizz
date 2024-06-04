@@ -1,10 +1,11 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message, InlineKeyboardButton, WebAppInfo
+from aiogram.types import Message, InlineKeyboardButton, WebAppInfo, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from fastapi import FastAPI
+from sqlalchemy import select
 
-from src.bot.service import get_user
+from src.bot.service import get_user, get_business_list_by_telegram_id, get_business_by_id
 from src.database.deps import get_session
 from src.routers.message.service import save_message
 from src.service.assistant import AssistantManager
@@ -100,3 +101,12 @@ async def handle_user_message(message: Message, app: FastAPI, external_url: str)
 
         loop = get_event_loop()
         loop.create_task(assistant_manager.process_assistant(task_payload))
+
+
+@router.callback_query(F.data.startswith("business"))
+async def handle_business_select(call: CallbackQuery):
+    business_id = int(call.data.split(":")[1])
+
+    async for session in get_session():
+        business = await get_business_by_id(session, business_id)
+        await call.message.edit_text(f"*Выбран план:* {business.name}\n\n*Выберите ассистента:*")

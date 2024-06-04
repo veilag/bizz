@@ -1,6 +1,6 @@
 import axios from "axios";
 const api = axios.create({
-  baseURL: "https://bizz-ai.ru/api/"
+  baseURL: "https://bizz-ai.ru/api/",
 });
 
 api.interceptors.request.use(
