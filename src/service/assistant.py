@@ -1,21 +1,18 @@
 import json
 from typing import Dict, Any
-
 from langchain.chat_models.gigachat import GigaChat
 from openai import OpenAI
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.config import cfg
 from src.database.deps import get_session
 from src.models import Message, Assistant, BusinessAssistantData
-import src.service.shared as shared
-
 from src.service.socket import WebSocketManager
-
 from jinja2 import Environment, BaseLoader
 from src.service.response import Response
 from src.service.registrator import Registrator
+
+import src.service.shared as shared
 
 
 def render(html_string: str, context: Dict[str, Any]):

@@ -8,12 +8,8 @@ module.exports = {
     './src/**/*.{ts,tsx}',
   ],
   safelist: [
-    {
-      pattern: /flex-+/
-    },
-    {
-      pattern: /mb-+/
-    }
+      "animate-pulse",
+      "animate-ping"
   ],
   prefix: "",
   theme: {
